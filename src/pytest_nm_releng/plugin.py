@@ -23,19 +23,19 @@ def get_utc_timestamp() -> float:
 
 
 def generate_junit_flags() -> list[str]:
-    if not (junitxml_base_dir := os.getenv("PDRN_JUNIT_BASE")):
+    if not (junitxml_base_dir := os.getenv("NMRE_JUNIT_BASE")):
         return []
 
     junitxml_file = Path(junitxml_base_dir) / f"{get_utc_timestamp()}.xml"
 
-    if prefix := os.getenv("PDRN_JUNIT_PREFIX"):
+    if prefix := os.getenv("NMRE_JUNIT_PREFIX"):
         junitxml_file = junitxml_file.with_name(f"{prefix}{junitxml_file.name}")
 
     return [f"--junit-xml={junitxml_file.as_posix()}"]
 
 
 def generate_coverage_flags() -> list[str]:
-    if not (cc_package_name := os.getenv("PDRN_COV_NAME")):
+    if not (cc_package_name := os.getenv("NMRE_COV_NAME")):
         return []
 
     return [
