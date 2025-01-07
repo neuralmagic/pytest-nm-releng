@@ -35,3 +35,6 @@ Repository = "https://github.com/neuralmagic/pytest-nm-releng"
 
 [project.entry-points.pytest11]
 nm-releng = "pytest_nm_releng.plugin"
+
+[tool.ruff.lint]
+extend-select = ["I"]

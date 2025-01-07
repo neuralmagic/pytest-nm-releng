@@ -13,9 +13,16 @@
 # limitations under the License.
 
 
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 
 import pytest
+
+
+try:
+    version("pytest-cov")
+    _pytest_cov_installed = True
+except PackageNotFoundError:
+    _pytest_cov_installed = False
 
 
 def test_plugin_loaded(pytester: pytest.Pytester):
@@ -30,3 +37,46 @@ def test_plugin_loaded(pytester: pytest.Pytester):
 
     result = pytester.runpytest()
     result.stdout.fnmatch_lines([f"plugins:*nm-releng-{plugin_version}*"])
+
+
+def test_plugin_adds_junit_args(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+):
+    """Verify the plugin adds the expected junit args"""
+
+    monkeypatch.setenv("NMRE_JUNIT_BASE", "results")
+
+    cf = pytester.parseconfigure()
+    actual = cf.getoption("--junit-xml", None)
+    assert actual is not None
+    assert actual.startswith("results")
+
+
+@pytest.mark.skipif(not _pytest_cov_installed, reason="pytest-cov is required")
+def test_plugin_adds_coverage_args(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+):
+    """Verify the plugin adds the expected coverage args"""
+
+    monkeypatch.setenv("NMRE_COV_NAME", "vllm")
+
+    cf = pytester.parseconfigure()
+
+    assert "vllm" in cf.getoption("--cov", None)
+    assert cf.getoption("--cov-append") is True
+
+
+@pytest.mark.skipif(not _pytest_cov_installed, reason="pytest-cov is required")
+def test_plugin_adds_all_args(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+):
+    """Verify the plugin adds the expected coverage args"""
+
+    monkeypatch.setenv("NMRE_JUNIT_BASE", "results")
+    monkeypatch.setenv("NMRE_COV_NAME", "vllm")
+
+    cf = pytester.parseconfigure()
+
+    assert cf.getoption("--junit-xml", None).startswith("results")
+    assert "vllm" in cf.getoption("--cov", None)
+    assert cf.getoption("--cov-append") is True

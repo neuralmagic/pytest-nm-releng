@@ -19,17 +19,9 @@ from typing import Union
 import pytest
 
 from pytest_nm_releng.plugin import generate_coverage_flags, generate_junit_flags
+from tests.utils import setenv
 
 EnvVarValue = Union[str, None]
-
-
-def _setenv(
-    monkeypatch: pytest.MonkeyPatch, name: str, value: Union[str, None]
-) -> None:
-    if value is None:
-        monkeypatch.delenv(name, raising=False)
-    else:
-        monkeypatch.setenv(name, value)
 
 
 @pytest.mark.parametrize(
@@ -43,7 +35,7 @@ def _setenv(
 def test_generate_coverage_flags_set(
     monkeypatch: pytest.MonkeyPatch, env_cov_name: EnvVarValue
 ):
-    _setenv(monkeypatch, "NMRE_COV_NAME", env_cov_name)
+    setenv(monkeypatch, "NMRE_COV_NAME", env_cov_name)
 
     if env_cov_name in (None, ""):
         expected_flags = []
@@ -78,8 +70,8 @@ def test_generate_junit_flags(
     env_junit_base: EnvVarValue,
     env_junit_prefix: EnvVarValue,
 ):
-    _setenv(monkeypatch, "NMRE_JUNIT_BASE", env_junit_base)
-    _setenv(monkeypatch, "NMRE_JUNIT_PREFIX", env_junit_prefix)
+    setenv(monkeypatch, "NMRE_JUNIT_BASE", env_junit_base)
+    setenv(monkeypatch, "NMRE_JUNIT_PREFIX", env_junit_prefix)
 
     result = generate_junit_flags()
 
