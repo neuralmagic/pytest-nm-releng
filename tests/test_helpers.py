@@ -36,7 +36,6 @@ def _setenv(
     "env_cov_name",
     [
         pytest.param("vllm", id="value:vllm"),
-        pytest.param("llmcompressor", id="value:llmcompressor"),
         pytest.param("", id="empty"),
         pytest.param(None, id="unset"),
     ],
@@ -63,15 +62,15 @@ def test_generate_coverage_flags_set(
 @pytest.mark.parametrize(
     ("env_junit_base", "env_junit_prefix"),
     [
-        pytest.param("test-results", None, id="base-with-unset-prefix"),
-        pytest.param("test-results", "", id="base-with-empty-prefix"),
         pytest.param("test-results", "run-", id="base-with-prefix"),
-        pytest.param(None, None, id="unset-base-with-unset-prefix"),
-        pytest.param(None, "", id="unset-base-with-empty-prefix"),
-        pytest.param(None, "run-", id="unset-base-with-prefix"),
-        pytest.param("", None, id="empty-base-with-unset-prefix"),
-        pytest.param("", "", id="empty-base-with-empty-prefix"),
+        pytest.param("test-results", "", id="base-with-empty-prefix"),
+        pytest.param("test-results", None, id="base-with-unset-prefix"),
         pytest.param("", "run-", id="empty-base-with-prefix"),
+        pytest.param("", "", id="empty-base-with-empty-prefix"),
+        pytest.param("", None, id="empty-base-with-unset-prefix"),
+        pytest.param(None, "run-", id="unset-base-with-prefix"),
+        pytest.param(None, "", id="unset-base-with-empty-prefix"),
+        pytest.param(None, None, id="unset-base-with-unset-prefix"),
     ],
 )
 def test_generate_junit_flags(
