@@ -17,7 +17,6 @@ from importlib.metadata import PackageNotFoundError, version
 
 import pytest
 
-
 try:
     version("pytest-cov")
     _pytest_cov_installed = True
