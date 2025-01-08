@@ -2,6 +2,18 @@
 
 A pytest plugin offering various functionality for Neural Magic’s Release Engineering team.
 
+## Installation
+
+The Python package can be installed directly from this git repository from either a branch or tag:
+
+```shell
+# recommended: use a version tag (e.g., v0.1.0)
+pip install https://github.com/neuralmagic/pytest-nm-releng/archive/v0.1.0.tar.gz
+
+# alternative: install based on a branch (e.g., main)
+pip install https://github.com/neuralmagic/pytest-nm-releng/archive/main.tar.gz
+```
+
 ## Features
 
 ### Dynamically-named JUnit report files
@@ -25,7 +37,7 @@ export NMRE_JUNIT_BASE=test-results
 pytest [...]
 
 # after either example, a file named something like
-# `test-results/1735941024.348248.xml` will be written
+# `test-results/1735941024.348248.xml` will be created
 ```
 
 Optionally, you can define `NMRE_JUNIT_PREFIX` with a value to be prefixed onto the file name. Note that no separator is used so you may want to include one.
@@ -36,7 +48,7 @@ export NMRE_JUNIT_PREFIX="report-"
 pytest [...]
 
 # after either example, a file named something like
-# `test-results/report-1735941218.338192.xml` will be written
+# `test-results/report-1735941218.338192.xml` will be created
 ```
 
 ### Code coverage
