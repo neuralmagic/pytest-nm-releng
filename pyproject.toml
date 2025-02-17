@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pytest-nm-releng"
 description = "A pytest plugin providing custom functionality for the Neural Magic release engineering team."
-version = "0.1.0"
+version = "0.2.0"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "Domenic Barbuzzi", email = "domenic@neuralmagic.com" }]
