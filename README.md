@@ -51,6 +51,23 @@ pytest [...]
 # `test-results/report-1735941218.338192.xml` will be created
 ```
 
+### Thorough JUnit report files
+
+`pytest-nm-releng` can append some flags that will make the generated JUnit report files more thorough/comprehensive:
+
+- All output will be included in the reported (including stdout/stderr like logging)
+- All typical results/output will be included for passing tests (normally this is only captured for failing/etc. tests)
+
+> ![NOTE]
+> This does _not_ append any flags to actually generate reports. This must be done manually or with the [Dynamically-named JUnit report files](#dynamically-named-junit-report-files) feature.
+
+To enable this feature, set the `NMRE_JUNIT_FULL` env var to `1`:
+
+```shell
+# example: prefixing a command
+NMRE_JUNIT_FULL=1 pytest [...]
+```
+
 ### Code coverage
 
 `pytest-nm-releng` can automatically add some code coverage flags as well (requires [pytest-cov]).

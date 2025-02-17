@@ -18,7 +18,11 @@ from typing import Union
 
 import pytest
 
-from pytest_nm_releng.plugin import generate_coverage_flags, generate_junit_flags
+from pytest_nm_releng.plugin import (
+    generate_coverage_flags,
+    generate_full_junit_flags,
+    generate_junit_flags,
+)
 from tests.utils import setenv
 
 EnvVarValue = Union[str, None]
@@ -48,6 +52,35 @@ def test_generate_coverage_flags_set(
         ]
 
     result = generate_coverage_flags()
+    assert result == expected_flags
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("vllm", id="value:vllm"),
+        pytest.param("", id="empty"),
+        pytest.param("1", id="1"),
+        pytest.param("0", id="0"),
+        pytest.param("2", id="2"),
+        pytest.param("-1", id="-1"),
+        pytest.param(None, id="unset"),
+    ],
+)
+def test_generate_full_junit_flags(monkeypatch: pytest.MonkeyPatch, value: EnvVarValue):
+    setenv(monkeypatch, "NMRE_JUNIT_FULL", value)
+
+    if value == "1":
+        expected_flags = [
+            "-o",
+            "junit_logging=all",
+            "-o",
+            "junit_log_passing_tests=True",
+        ]
+    else:
+        expected_flags = []
+
+    result = generate_full_junit_flags()
     assert result == expected_flags
 
 

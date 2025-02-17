@@ -51,6 +51,19 @@ def test_plugin_adds_junit_args(
     assert actual.startswith("results")
 
 
+def test_plugin_adds_full_junit_args(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+):
+    """Verify the plugin adds the expected junit args"""
+
+    monkeypatch.setenv("NMRE_JUNIT_FULL", "1")
+
+    cf = pytester.parseconfigure()
+    actual = cf.getoption("-o", None)
+    assert actual is not None
+    assert actual == ["junit_logging=all", "junit_log_passing_tests=True"]
+
+
 @pytest.mark.skipif(not _pytest_cov_installed, reason="pytest-cov is required")
 def test_plugin_adds_coverage_args(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
@@ -72,10 +85,15 @@ def test_plugin_adds_all_args(
     """Verify the plugin adds the expected coverage args"""
 
     monkeypatch.setenv("NMRE_JUNIT_BASE", "results")
+    monkeypatch.setenv("NMRE_JUNIT_FULL", "1")
     monkeypatch.setenv("NMRE_COV_NAME", "vllm")
 
     cf = pytester.parseconfigure()
 
-    assert cf.getoption("--junit-xml", None).startswith("results")
-    assert "vllm" in cf.getoption("--cov", None)
+    assert cf.getoption("--junit-xml", "").startswith("results")
+    assert "vllm" in cf.getoption("--cov", [])
+    assert cf.getoption("-o", None) == [
+        "junit_logging=all",
+        "junit_log_passing_tests=True",
+    ]
     assert cf.getoption("--cov-append") is True
