@@ -7,8 +7,8 @@ A pytest plugin offering various functionality for Neural Magic’s Release Engi
 The Python package can be installed directly from this git repository from either a branch or tag:
 
 ```shell
-# recommended: use a version tag (e.g., v0.1.0)
-pip install https://github.com/neuralmagic/pytest-nm-releng/archive/v0.1.0.tar.gz
+# recommended: use a version tag (e.g., v0.2.0)
+pip install https://github.com/neuralmagic/pytest-nm-releng/archive/v0.2.0.tar.gz
 
 # alternative: install based on a branch (e.g., main)
 pip install https://github.com/neuralmagic/pytest-nm-releng/archive/main.tar.gz
