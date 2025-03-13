@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "pytest>=8",
+    "uuid-utils>=0.10.0",
 ]
 
 [project.urls]

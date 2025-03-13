@@ -15,18 +15,45 @@
 
 import os
 from datetime import datetime, timezone
+from enum import Enum
 from pathlib import Path
 
+from uuid_utils import uuid4, uuid7
 
-def get_utc_timestamp() -> float:
-    return datetime.now(timezone.utc).timestamp()
+
+class SuffixType(Enum):
+    TIMESTAMP = "timestamp"
+    UUID4 = "uuid4"
+    UUID7 = "uuid7"
+
+
+def get_utc_timestamp() -> str:
+    return str(datetime.now(timezone.utc).timestamp())
+
+
+def generate_suffix(suffix_type: SuffixType) -> str:
+    suffix_map = {
+        SuffixType.TIMESTAMP: get_utc_timestamp,
+        SuffixType.UUID4: lambda: str(uuid4()),
+        SuffixType.UUID7: lambda: str(uuid7()),
+    }
+    return suffix_map.get(suffix_type, get_utc_timestamp)()
 
 
 def generate_junit_flags() -> list[str]:
     if not (junitxml_base_dir := os.getenv("NMRE_JUNIT_BASE")):
         return []
 
-    junitxml_file = Path(junitxml_base_dir) / f"{get_utc_timestamp()}.xml"
+    junit_suffix_type = os.getenv("NMRE_JUNIT_SUFFIX_TYPE")
+    junit_suffix_type = (
+        SuffixType(junit_suffix_type)
+        if junit_suffix_type in SuffixType._value2member_map_
+        else SuffixType.TIMESTAMP
+    )
+
+    junitxml_file = (
+        Path(junitxml_base_dir) / f"{generate_suffix(junit_suffix_type)}.xml"
+    )
 
     if prefix := os.getenv("NMRE_JUNIT_PREFIX"):
         junitxml_file = junitxml_file.with_name(f"{prefix}{junitxml_file.name}")

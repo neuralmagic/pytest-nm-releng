@@ -40,7 +40,11 @@ pytest [...]
 # `test-results/1735941024.348248.xml` will be created
 ```
 
-Optionally, you can define `NMRE_JUNIT_PREFIX` with a value to be prefixed onto the file name. Note that no separator is used so you may want to include one.
+#### Additional options
+
+##### Filename prefix
+
+An environment variable named `NMRE_JUNIT_PREFIX` can be defined with a value to be prefixed onto the file name. Note that no separator is used so you may want to include one.
 
 ```shell
 export NMRE_JUNIT_BASE=test-results
@@ -49,6 +53,20 @@ pytest [...]
 
 # after either example, a file named something like
 # `test-results/report-1735941218.338192.xml` will be created
+```
+
+##### Filename suffix types
+
+An environment variable named `NMRE_JUNIT_SUFFIX_TYPE` can be defined to control what type of suffix is used. Valid values are `timestamp` (default), `uuid4`, and `uuid7`.
+
+```shell
+export NMRE_JUNIT_BASE=test-results
+export NMRE_JUNIT_PREFIX="report-"
+export NMRE_JUNIT_SUFFIX_TYPE=uuid4
+pytest [...]
+
+# after either example, a file named something like
+# `test-results/report-ffe95fcc-b818-4aca-a350-e0a35b9de6ec.xml` will be created
 ```
 
 ## Contributing

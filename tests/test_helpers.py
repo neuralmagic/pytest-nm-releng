@@ -23,28 +23,47 @@ from tests.utils import setenv
 
 EnvVarValue = Union[str, None]
 
+SUFFIX_PATTERN_MAP = {
+    "timestamp": r"\d{10,}\.\d+\.xml",
+    "uuid4": r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.xml",
+    "uuid7": r"[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.xml",
+}
+DEFAULT_SUFFIX_PATTERN = SUFFIX_PATTERN_MAP["timestamp"]
+
 
 @pytest.mark.parametrize(
-    ("env_junit_base", "env_junit_prefix"),
+    ("env_junit_base", "env_junit_prefix", "env_junit_suffix"),
     [
-        pytest.param("test-results", "run-", id="base-with-prefix"),
-        pytest.param("test-results", "", id="base-with-empty-prefix"),
-        pytest.param("test-results", None, id="base-with-unset-prefix"),
-        pytest.param("", "run-", id="empty-base-with-prefix"),
-        pytest.param("", "", id="empty-base-with-empty-prefix"),
-        pytest.param("", None, id="empty-base-with-unset-prefix"),
-        pytest.param(None, "run-", id="unset-base-with-prefix"),
-        pytest.param(None, "", id="unset-base-with-empty-prefix"),
-        pytest.param(None, None, id="unset-base-with-unset-prefix"),
+        # base path present
+        pytest.param("test-results", "run-", "", id="base-with-prefix"),
+        pytest.param("test-results", "", "", id="base-with-empty-prefix"),
+        pytest.param("test-results", None, "", id="base-with-unset-prefix"),
+        # base path empty
+        pytest.param("", "run-", "", id="empty-base-with-prefix"),
+        pytest.param("", "", "", id="empty-base-with-empty-prefix"),
+        pytest.param("", None, "", id="empty-base-with-unset-prefix"),
+        # base path unset
+        pytest.param(None, "run-", "", id="unset-base-with-prefix"),
+        pytest.param(None, "", "", id="unset-base-with-empty-prefix"),
+        pytest.param(None, None, "", id="unset-base-with-unset-prefix"),
+        # suffix empty/unset
+        pytest.param("test-results", "", None, id="unset-suffix-type"),
+        pytest.param("test-results", "", "", id="empty-suffix-type"),
+        # suffix type variants
+        pytest.param("test-results", "", "timestamp", id="suffix-timestamp"),
+        pytest.param("test-results", "", "uuid4", id="suffix-uuid4"),
+        pytest.param("test-results", "", "uuid7", id="suffix-uuid7"),
     ],
 )
 def test_generate_junit_flags(
     monkeypatch: pytest.MonkeyPatch,
     env_junit_base: EnvVarValue,
     env_junit_prefix: EnvVarValue,
+    env_junit_suffix: EnvVarValue,
 ):
     setenv(monkeypatch, "NMRE_JUNIT_BASE", env_junit_base)
     setenv(monkeypatch, "NMRE_JUNIT_PREFIX", env_junit_prefix)
+    setenv(monkeypatch, "NMRE_JUNIT_SUFFIX_TYPE", env_junit_suffix)
 
     result = generate_junit_flags()
 
@@ -66,7 +85,7 @@ def test_generate_junit_flags(
     fpath, fname = value.rsplit(os.sep, 1)
     assert fpath == env_junit_base
 
-    pattern = r"\d{10,}\.\d+\.xml"
+    pattern = SUFFIX_PATTERN_MAP.get(str(env_junit_suffix), DEFAULT_SUFFIX_PATTERN)
     if env_junit_prefix not in (None, ""):
         pattern = f"{env_junit_prefix}{pattern}"
 
