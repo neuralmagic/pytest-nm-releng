@@ -56,8 +56,11 @@ pytest [...]
 To contribute, follow these general steps:
 
 1. Fork the repository
+
 1. Create a new branch
+
 1. Make your changes
+
 1. Install `tox`
 
    ```shell
