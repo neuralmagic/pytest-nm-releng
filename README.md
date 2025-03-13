@@ -51,37 +51,6 @@ pytest [...]
 # `test-results/report-1735941218.338192.xml` will be created
 ```
 
-### Thorough JUnit report files
-
-`pytest-nm-releng` can append some flags that will make the generated JUnit report files more thorough/comprehensive:
-
-- All output will be included in the reported (including stdout/stderr like logging)
-- All typical results/output will be included for passing tests (normally this is only captured for failing/etc. tests)
-
-> ![NOTE]
-> This does _not_ append any flags to actually generate reports. This must be done manually or with the [Dynamically-named JUnit report files](#dynamically-named-junit-report-files) feature.
-
-To enable this feature, set the `NMRE_JUNIT_FULL` env var to `1`:
-
-```shell
-# example: prefixing a command
-NMRE_JUNIT_FULL=1 pytest [...]
-```
-
-### Code coverage
-
-`pytest-nm-releng` can automatically add some code coverage flags as well (requires [pytest-cov]).
-
-To enable this behavior, define the `NMRE_COV_NAME` environment variable with a value of the project’s *_module_* name (e.g., the name that is used to import it within Python code).
-
-```shell
-# example: used with `nm-vllm-ent`, which is imported as `vllm`
-NMRE_COV_NAME=vllm pytest [...]
-
-# this will result in the following flags being appended:
-# --cov=vllm --cov-append --cov-report=html:coverage-html --cov-report=json:coverage.json
-```
-
 ## Contributing
 
 To contribute, follow these general steps:
@@ -90,13 +59,16 @@ To contribute, follow these general steps:
 1. Create a new branch
 1. Make your changes
 1. Install `tox`
+
    ```shell
    # example: using pipx
    pipx install tox
    # example: using uv
    uv tool install tox --with tox-uv
    ```
+
 1. Run quality checks and tests
+
    ```shell
    # apply available automatic style/formatting fixes
    tox -e format
@@ -105,6 +77,7 @@ To contribute, follow these general steps:
    # run tests
    tox -e py
    ```
+
 1. Submit a pull request with your changes
 
 ## Acknowledgements
@@ -114,4 +87,3 @@ This pytest plugin was generated with [Cookiecutter] along with [@hackebrot]'s [
 [@hackebrot]: https://github.com/hackebrot
 [cookiecutter]: https://github.com/audreyr/cookiecutter
 [cookiecutter-pytest-plugin]: https://github.com/pytest-dev/cookiecutter-pytest-plugin
-[pytest-cov]: https://github.com/pytest-dev/pytest-cov
