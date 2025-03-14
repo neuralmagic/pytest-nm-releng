@@ -47,5 +47,5 @@ def test_plugin_adds_junit_args(
 
     cf = pytester.parseconfigure()
     actual = cf.getoption("--junit-xml", None)
-    assert actual is not None
+    assert isinstance(actual, str)
     assert actual.startswith("results")

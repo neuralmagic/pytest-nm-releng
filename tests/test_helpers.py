@@ -18,33 +18,51 @@ from typing import Union
 
 import pytest
 
-from pytest_nm_releng.plugin import generate_junit_flags
+from pytest_nm_releng.plugin import DEFAULT_SUFFIX_TYPE, generate_junit_flags
 from tests.utils import setenv
 
 EnvVarValue = Union[str, None]
 
+SUFFIX_PATTERN_MAP = {
+    "timestamp": r"\d{10,}\.\d+\.xml",
+    "uuid4": r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.xml",
+    "uuid7": r"[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.xml",
+}
+DEFAULT_SUFFIX_PATTERN = SUFFIX_PATTERN_MAP[DEFAULT_SUFFIX_TYPE.value]
+
 
 @pytest.mark.parametrize(
-    ("env_junit_base", "env_junit_prefix"),
+    ("env_junit_base", "env_junit_prefix", "env_junit_suffix"),
     [
-        pytest.param("test-results", "run-", id="base-with-prefix"),
-        pytest.param("test-results", "", id="base-with-empty-prefix"),
-        pytest.param("test-results", None, id="base-with-unset-prefix"),
-        pytest.param("", "run-", id="empty-base-with-prefix"),
-        pytest.param("", "", id="empty-base-with-empty-prefix"),
-        pytest.param("", None, id="empty-base-with-unset-prefix"),
-        pytest.param(None, "run-", id="unset-base-with-prefix"),
-        pytest.param(None, "", id="unset-base-with-empty-prefix"),
-        pytest.param(None, None, id="unset-base-with-unset-prefix"),
+        # base path present
+        pytest.param("test-results", "run-", None, id="base-with-prefix"),
+        pytest.param("test-results", "", None, id="base-with-empty-prefix"),
+        pytest.param("test-results", None, None, id="base-with-unset-prefix"),
+        # base path empty
+        pytest.param("", "run-", "", id="empty-base-with-prefix"),
+        pytest.param("", "", "", id="empty-base-with-empty-prefix"),
+        pytest.param("", None, "", id="empty-base-with-unset-prefix"),
+        # base path unset
+        pytest.param(None, "run-", "", id="unset-base-with-prefix"),
+        pytest.param(None, "", "", id="unset-base-with-empty-prefix"),
+        pytest.param(None, None, "", id="unset-base-with-unset-prefix"),
+        # suffix unset should use default
+        pytest.param("test-results", "", None, id="unset-suffix-type"),
+        # suffix type explicitly set
+        pytest.param("test-results", "", "timestamp", id="suffix-timestamp"),
+        pytest.param("test-results", "", "uuid4", id="suffix-uuid4"),
+        pytest.param("test-results", "", "uuid7", id="suffix-uuid7"),
     ],
 )
 def test_generate_junit_flags(
     monkeypatch: pytest.MonkeyPatch,
     env_junit_base: EnvVarValue,
     env_junit_prefix: EnvVarValue,
+    env_junit_suffix: EnvVarValue,
 ):
     setenv(monkeypatch, "NMRE_JUNIT_BASE", env_junit_base)
     setenv(monkeypatch, "NMRE_JUNIT_PREFIX", env_junit_prefix)
+    setenv(monkeypatch, "NMRE_JUNIT_SUFFIX_TYPE", env_junit_suffix)
 
     result = generate_junit_flags()
 
@@ -66,9 +84,31 @@ def test_generate_junit_flags(
     fpath, fname = value.rsplit(os.sep, 1)
     assert fpath == env_junit_base
 
-    pattern = r"\d{10,}\.\d+\.xml"
+    pattern = SUFFIX_PATTERN_MAP.get(str(env_junit_suffix), DEFAULT_SUFFIX_PATTERN)
     if env_junit_prefix not in (None, ""):
         pattern = f"{env_junit_prefix}{pattern}"
 
     pattern = re.compile(pattern)
+    assert pattern.fullmatch(fname)
+
+
+@pytest.mark.parametrize("env_junit_suffix", [(""), ("uuid"), ("uuid1"), ("uiud4")])
+def test_invalid_suffix_type(
+    monkeypatch: pytest.MonkeyPatch, env_junit_suffix: EnvVarValue
+):
+    """Unset/invalid suffix type value should emit a warning and use the default."""
+    setenv(monkeypatch, "NMRE_JUNIT_BASE", "test-results")
+    setenv(monkeypatch, "NMRE_JUNIT_SUFFIX_TYPE", env_junit_suffix)
+
+    with pytest.warns(
+        UserWarning, match="^NMRE_JUNIT_SUFFIX_TYPE must be one of"
+    ) as emitted:
+        result = generate_junit_flags()
+    assert len(result) == 1
+    assert len(emitted) == 1
+
+    _, value = result[0].split("=", maxsplit=1)
+    _, fname = value.rsplit(os.sep, maxsplit=1)
+
+    pattern = re.compile(DEFAULT_SUFFIX_PATTERN)
     assert pattern.fullmatch(fname)
