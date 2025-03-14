@@ -46,9 +46,8 @@ DEFAULT_SUFFIX_PATTERN = SUFFIX_PATTERN_MAP[DEFAULT_SUFFIX_TYPE.value]
         pytest.param(None, "run-", "", id="unset-base-with-prefix"),
         pytest.param(None, "", "", id="unset-base-with-empty-prefix"),
         pytest.param(None, None, "", id="unset-base-with-unset-prefix"),
-        # suffix empty/unset should use default
+        # suffix unset should use default
         pytest.param("test-results", "", None, id="unset-suffix-type"),
-        pytest.param("test-results", "", "", id="empty-suffix-type"),
         # suffix type explicitly set
         pytest.param("test-results", "", "timestamp", id="suffix-timestamp"),
         pytest.param("test-results", "", "uuid4", id="suffix-uuid4"),
@@ -90,4 +89,26 @@ def test_generate_junit_flags(
         pattern = f"{env_junit_prefix}{pattern}"
 
     pattern = re.compile(pattern)
+    assert pattern.fullmatch(fname)
+
+
+@pytest.mark.parametrize("env_junit_suffix", [(""), ("uuid"), ("uuid1"), ("uiud4")])
+def test_invalid_suffix_type(
+    monkeypatch: pytest.MonkeyPatch, env_junit_suffix: EnvVarValue
+):
+    """Unset/invalid suffix type value should emit a warning and use the default."""
+    setenv(monkeypatch, "NMRE_JUNIT_BASE", "test-results")
+    setenv(monkeypatch, "NMRE_JUNIT_SUFFIX_TYPE", env_junit_suffix)
+
+    with pytest.warns(
+        UserWarning, match="^NMRE_JUNIT_SUFFIX_TYPE must be one of"
+    ) as emitted:
+        result = generate_junit_flags()
+    assert len(result) == 1
+    assert len(emitted) == 1
+
+    _, value = result[0].split("=", maxsplit=1)
+    _, fname = value.rsplit(os.sep, maxsplit=1)
+
+    pattern = re.compile(DEFAULT_SUFFIX_PATTERN)
     assert pattern.fullmatch(fname)

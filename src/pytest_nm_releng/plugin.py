@@ -14,6 +14,7 @@
 
 
 import os
+import warnings
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
@@ -47,12 +48,18 @@ def generate_junit_flags() -> list[str]:
     if not (junitxml_base_dir := os.getenv("NMRE_JUNIT_BASE")):
         return []
 
-    junit_suffix_type = os.getenv("NMRE_JUNIT_SUFFIX_TYPE", DEFAULT_SUFFIX_TYPE)
-    junit_suffix_type = (
-        SuffixType(junit_suffix_type)
-        if junit_suffix_type in SuffixType._value2member_map_
-        else SuffixType.TIMESTAMP
-    )
+    valid_suffix_types = [st.value for st in SuffixType]
+    junit_suffix_type = os.getenv("NMRE_JUNIT_SUFFIX_TYPE", DEFAULT_SUFFIX_TYPE.value)
+    if junit_suffix_type in valid_suffix_types:
+        junit_suffix_type = SuffixType(junit_suffix_type)
+    else:
+        msg = (
+            "NMRE_JUNIT_SUFFIX_TYPE must be one of "
+            f"{', '.join(valid_suffix_types)}, got '{junit_suffix_type}'."
+            f" Defaulting to '{DEFAULT_SUFFIX_TYPE.value}'."
+        )
+        warnings.warn(msg, UserWarning)
+        junit_suffix_type = DEFAULT_SUFFIX_TYPE
 
     prefix = os.getenv("NMRE_JUNIT_PREFIX", "")
     junitxml_file = (
