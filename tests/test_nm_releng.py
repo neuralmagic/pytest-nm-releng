@@ -13,15 +13,9 @@
 # limitations under the License.
 
 
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import version
 
 import pytest
-
-try:
-    version("pytest-cov")
-    _pytest_cov_installed = True
-except PackageNotFoundError:
-    _pytest_cov_installed = False
 
 
 def test_plugin_loaded(pytester: pytest.Pytester):
