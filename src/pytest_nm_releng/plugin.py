@@ -27,6 +27,9 @@ class SuffixType(Enum):
     UUID7 = "uuid7"
 
 
+DEFAULT_SUFFIX_TYPE = SuffixType.TIMESTAMP
+
+
 def get_utc_timestamp() -> str:
     return str(datetime.now(timezone.utc).timestamp())
 
@@ -44,7 +47,7 @@ def generate_junit_flags() -> list[str]:
     if not (junitxml_base_dir := os.getenv("NMRE_JUNIT_BASE")):
         return []
 
-    junit_suffix_type = os.getenv("NMRE_JUNIT_SUFFIX_TYPE")
+    junit_suffix_type = os.getenv("NMRE_JUNIT_SUFFIX_TYPE", DEFAULT_SUFFIX_TYPE)
     junit_suffix_type = (
         SuffixType(junit_suffix_type)
         if junit_suffix_type in SuffixType._value2member_map_

@@ -18,7 +18,7 @@ from typing import Union
 
 import pytest
 
-from pytest_nm_releng.plugin import generate_junit_flags
+from pytest_nm_releng.plugin import DEFAULT_SUFFIX_TYPE, generate_junit_flags
 from tests.utils import setenv
 
 EnvVarValue = Union[str, None]
@@ -28,16 +28,16 @@ SUFFIX_PATTERN_MAP = {
     "uuid4": r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.xml",
     "uuid7": r"[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.xml",
 }
-DEFAULT_SUFFIX_PATTERN = SUFFIX_PATTERN_MAP["timestamp"]
+DEFAULT_SUFFIX_PATTERN = SUFFIX_PATTERN_MAP[DEFAULT_SUFFIX_TYPE.value]
 
 
 @pytest.mark.parametrize(
     ("env_junit_base", "env_junit_prefix", "env_junit_suffix"),
     [
         # base path present
-        pytest.param("test-results", "run-", "", id="base-with-prefix"),
-        pytest.param("test-results", "", "", id="base-with-empty-prefix"),
-        pytest.param("test-results", None, "", id="base-with-unset-prefix"),
+        pytest.param("test-results", "run-", None, id="base-with-prefix"),
+        pytest.param("test-results", "", None, id="base-with-empty-prefix"),
+        pytest.param("test-results", None, None, id="base-with-unset-prefix"),
         # base path empty
         pytest.param("", "run-", "", id="empty-base-with-prefix"),
         pytest.param("", "", "", id="empty-base-with-empty-prefix"),
@@ -46,10 +46,10 @@ DEFAULT_SUFFIX_PATTERN = SUFFIX_PATTERN_MAP["timestamp"]
         pytest.param(None, "run-", "", id="unset-base-with-prefix"),
         pytest.param(None, "", "", id="unset-base-with-empty-prefix"),
         pytest.param(None, None, "", id="unset-base-with-unset-prefix"),
-        # suffix empty/unset
+        # suffix empty/unset should use default
         pytest.param("test-results", "", None, id="unset-suffix-type"),
         pytest.param("test-results", "", "", id="empty-suffix-type"),
-        # suffix type variants
+        # suffix type explicitly set
         pytest.param("test-results", "", "timestamp", id="suffix-timestamp"),
         pytest.param("test-results", "", "uuid4", id="suffix-uuid4"),
         pytest.param("test-results", "", "uuid7", id="suffix-uuid7"),
