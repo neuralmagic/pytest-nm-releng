@@ -69,6 +69,38 @@ pytest [...]
 # `test-results/report-ffe95fcc-b818-4aca-a350-e0a35b9de6ec.xml` will be created
 ```
 
+### Adding testsuite/testcase properties
+
+The plugin adds two optional CLI flags, `--testsuite-property` and `--testcase-property`, which provide a means to adding properties to the testsuite and testcase JUnit elements respectively.
+
+Both flags accept multiple arguments and use the same format: `name=value`. Each passed argument is split on the _first_ `=` character, so any additional characters in an individual arg will be part of the value. For example, `opts=gpu=h100` would result in a property with name `opts` and value `gpu=h100`.
+
+> [!NOTE]
+> Arguments passed to the `--testcase-property` flag will be added as properties to _all_ test cases in the run.
+
+> [!IMPORTANT]
+> Because these flags accept multiple arguments, they must be added **after** any positional args. It is okay to include them before other flags.
+
+#### Example: Adding testsuite properties
+
+```shell
+pytest [...] --testsuite-property gpu=h100
+# adds a property to the testsuite element with name 'gpu' and value 'h100'
+pytest [...] --testsuite-property gpu_name=h100 gpu_count=2
+# adds two properties to the testsuite element: one with name=gpu_name/value=h100
+# and one with name=gpu_count/value=2
+```
+
+#### Example: Adding testcase properties
+
+```shell
+pytest [...] --testcase-property gpu=h100
+# adds a property to all testcase elements with name 'gpu' and value 'h100'
+pytest [...] --testcase-property gpu_name=h100 gpu_count=2
+# adds two properties to all testcase elements: one with
+# name=gpu_name/value=h100 and one with name=gpu_count/value=2
+```
+
 ## Contributing
 
 To contribute, follow these general steps:

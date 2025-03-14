@@ -18,7 +18,7 @@ from typing import Union
 
 import pytest
 
-from pytest_nm_releng.plugin import DEFAULT_SUFFIX_TYPE, generate_junit_flags
+from pytest_nm_releng.lib import DEFAULT_SUFFIX_TYPE, generate_junit_flags
 from tests.utils import setenv
 
 EnvVarValue = Union[str, None]
