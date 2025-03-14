@@ -69,7 +69,10 @@ def test_plugin_adds_junit_args(
     )
 
 
-@pytest.mark.parametrize("properties", [["courses=3"], ["courses=3", "dessert=true"]])
+@pytest.mark.parametrize(
+    "properties",
+    [["courses=3"], ["courses=3", "dessert=true"], ["courses=dessert=ice-cream"]],
+)
 def test_plugin_adds_case_properties(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch, properties: list[str]
 ):
@@ -107,7 +110,10 @@ def test_plugin_adds_case_properties(
         assert sorted(props) == sorted(properties)
 
 
-@pytest.mark.parametrize("properties", [["courses=3"], ["courses=3", "dessert=true"]])
+@pytest.mark.parametrize(
+    "properties",
+    [["courses=3"], ["courses=3", "dessert=true"], ["courses=dessert=ice-cream"]],
+)
 def test_plugin_adds_suite_properties(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch, properties: list[str]
 ):
