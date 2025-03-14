@@ -54,12 +54,10 @@ def generate_junit_flags() -> list[str]:
         else SuffixType.TIMESTAMP
     )
 
+    prefix = os.getenv("NMRE_JUNIT_PREFIX", "")
     junitxml_file = (
-        Path(junitxml_base_dir) / f"{generate_suffix(junit_suffix_type)}.xml"
+        Path(junitxml_base_dir) / f"{prefix}{generate_suffix(junit_suffix_type)}.xml"
     )
-
-    if prefix := os.getenv("NMRE_JUNIT_PREFIX"):
-        junitxml_file = junitxml_file.with_name(f"{prefix}{junitxml_file.name}")
 
     return [f"--junit-xml={junitxml_file}"]
 
