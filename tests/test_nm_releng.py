@@ -14,6 +14,7 @@
 
 
 from importlib.metadata import version
+from xml.dom import minidom
 
 import pytest
 
@@ -43,3 +44,76 @@ def test_plugin_adds_junit_args(
     actual = cf.getoption("--junit-xml", None)
     assert isinstance(actual, str)
     assert actual.startswith("results")
+
+
+@pytest.mark.parametrize("properties", [["courses=3"], ["courses=3", "dessert=true"]])
+def test_plugin_adds_case_properties(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch, properties: list[str]
+):
+    monkeypatch.delenv("NMRE_JUNIT_BASE", raising=False)
+    pytester.makepyfile("""
+        def test_pass():
+            pass
+        def test_pass_2():
+            pass
+    """)
+
+    xml_path = pytester.path.joinpath("junit.xml")
+    result = pytester.runpytest(
+        "--junitxml", xml_path, "--testcase-property", *properties
+    )
+    assert result.ret == 0
+
+    dom = minidom.parse(str(xml_path))
+    cases = dom.getElementsByTagName("testcase")
+    assert len(cases) == 2
+
+    for case in cases:
+        case_properties = case.getElementsByTagName("property")
+        assert len(case_properties) == len(properties)
+
+        props: list[str] = []
+        for case_property in case_properties:
+            joined = "=".join(
+                [
+                    case_property.getAttribute("name"),
+                    case_property.getAttribute("value"),
+                ]
+            )
+            props.append(joined)
+        assert sorted(props) == sorted(properties)
+
+
+@pytest.mark.parametrize("properties", [["courses=3"], ["courses=3", "dessert=true"]])
+def test_plugin_adds_suite_properties(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch, properties: list[str]
+):
+    monkeypatch.delenv("NMRE_JUNIT_BASE", raising=False)
+    pytester.makepyfile("""
+        def test_pass():
+            pass
+    """)
+
+    xml_path = pytester.path.joinpath("junit.xml")
+    result = pytester.runpytest(
+        "--junitxml", xml_path, "--testsuite-property", *properties
+    )
+    assert result.ret == 0
+
+    dom = minidom.parse(str(xml_path))
+    suites = dom.getElementsByTagName("testsuite")
+    assert len(suites) == 1
+
+    suite_properties = suites[0].getElementsByTagName("property")
+    assert len(suite_properties) == len(properties)
+
+    props: list[str] = []
+    for suite_property in suite_properties:
+        joined = "=".join(
+            [
+                suite_property.getAttribute("name"),
+                suite_property.getAttribute("value"),
+            ]
+        )
+        props.append(joined)
+    assert sorted(props) == sorted(properties)
