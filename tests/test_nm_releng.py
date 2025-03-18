@@ -13,9 +13,7 @@
 # limitations under the License.
 
 import os
-import re
 from importlib.metadata import version
-from pathlib import Path
 from xml.dom import minidom
 
 import pytest
