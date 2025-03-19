@@ -12,64 +12,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Callable
 
-import os
-import warnings
-from datetime import datetime, timezone
-from enum import Enum
-from pathlib import Path
+import pytest
 
-from uuid_utils import uuid4, uuid7
-
-
-class SuffixType(Enum):
-    TIMESTAMP = "timestamp"
-    UUID4 = "uuid4"
-    UUID7 = "uuid7"
-
-
-DEFAULT_SUFFIX_TYPE = SuffixType.TIMESTAMP
-
-
-def get_utc_timestamp() -> str:
-    return str(datetime.now(timezone.utc).timestamp())
-
-
-def generate_suffix(suffix_type: SuffixType) -> str:
-    suffix_map = {
-        SuffixType.TIMESTAMP: get_utc_timestamp,
-        SuffixType.UUID4: lambda: str(uuid4()),
-        SuffixType.UUID7: lambda: str(uuid7()),
-    }
-    return suffix_map.get(suffix_type, get_utc_timestamp)()
-
-
-def generate_junit_flags() -> list[str]:
-    if not (junitxml_base_dir := os.getenv("NMRE_JUNIT_BASE")):
-        return []
-
-    valid_suffix_types = [st.value for st in SuffixType]
-    junit_suffix_type = os.getenv("NMRE_JUNIT_SUFFIX_TYPE", DEFAULT_SUFFIX_TYPE.value)
-    if junit_suffix_type in valid_suffix_types:
-        junit_suffix_type = SuffixType(junit_suffix_type)
-    else:
-        msg = (
-            "NMRE_JUNIT_SUFFIX_TYPE must be one of "
-            f"{', '.join(valid_suffix_types)}, got '{junit_suffix_type}'."
-            f" Defaulting to '{DEFAULT_SUFFIX_TYPE.value}'."
-        )
-        warnings.warn(msg, UserWarning)
-        junit_suffix_type = DEFAULT_SUFFIX_TYPE
-
-    prefix = os.getenv("NMRE_JUNIT_PREFIX", "")
-    junitxml_file = (
-        Path(junitxml_base_dir) / f"{prefix}{generate_suffix(junit_suffix_type)}.xml"
-    )
-
-    return [f"--junit-xml={junitxml_file}"]
+from .lib import generate_junit_flags
 
 
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
     args[:] = [*args, *new_args]
+
+
+# add CLI options to pass properties for test cases/suites
+def pytest_addoption(parser: pytest.Parser, pluginmanager):
+    parser.addoption(
+        "--testcase-property",
+        dest="testcase_property",
+        nargs="*",
+        help="property to add to all test cases (can pass multiple separated values)",
+    )
+    parser.addoption(
+        "--testsuite-property",
+        dest="testsuite_property",
+        nargs="*",
+        help="property to add to test suite (can pass multiple separated values)",
+    )
+
+
+# use pytest hook to add properties to testcase
+def pytest_collection_modifyitems(
+    session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
+):
+    if not (properties := config.getoption("testcase_property")):
+        return
+    for item in items:
+        for property in properties:
+            name, val = property.split("=", maxsplit=1)
+            item.user_properties.append((name, val))
+
+
+# use fixture to add properties to testsuite
+@pytest.fixture(autouse=True, scope="session")
+def add_testsuite_property(
+    request: pytest.FixtureRequest,
+    record_testsuite_property: Callable[[str, object], None],
+):
+    if not (suite_properties := request.config.getoption("testsuite_property")):
+        return
+    for property in suite_properties:
+        name, value = property.split("=", maxsplit=1)
+        record_testsuite_property(name, value)
