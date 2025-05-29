@@ -84,11 +84,6 @@ def generate_coverage_flags() -> list[str]:
     pytest_section = tool.setdefault("pytest", {})
     ini_options = pytest_section.setdefault("ini_options", {})
 
-    coverage_opts = (
-        f"--cov=vllm --cov-append "
-        "--cov-report=term --cov-report=html --cov-report=json"
-    )
-
     return [
         f"--cov={cc_package_name}",
         "--cov-append",
