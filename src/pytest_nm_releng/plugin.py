@@ -91,11 +91,11 @@ def generate_coverage_flags() -> list[str]:
     )
 
     existing_addopts = ini_options.get("addopts", "")
-    # if coverage_opts not in existing_addopts:
-    #     ini_options["addopts"] = f"{existing_addopts} {coverage_opts}".strip()
+    if coverage_opts not in existing_addopts:
+        ini_options["addopts"] = f"{existing_addopts} {coverage_opts}".strip()
 
-    #     with open(pyproject_path, "w") as f:
-    #         toml.dump(data, f)
+        with open(pyproject_path, "w") as f:
+            toml.dump(data, f)
 
     return [
         f"--cov={cc_package_name}",
