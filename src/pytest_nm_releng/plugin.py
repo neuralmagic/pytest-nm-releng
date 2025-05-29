@@ -73,12 +73,20 @@ def generate_coverage_flags() -> list[str]:
     if not (cc_package_name := os.getenv("NMRE_COV_NAME")):
         return []
 
+    pyproject_path = Path("pyproject.toml")
+    if pyproject_path.exists():
+        with open(pyproject_path, "r") as f:
+            data = toml.load(f)
+    else:
+        data = {}
+
     return [
         f"--cov={cc_package_name}",
         "--cov-append",
         "--cov-report=html:coverage-html",
         "--cov-report=json:coverage.json",
     ]
+
 
 
     
