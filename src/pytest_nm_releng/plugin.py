@@ -84,10 +84,10 @@ def generate_coverage_flags() -> list[str]:
     pytest_section = tool.setdefault("pytest", {})
     ini_options = pytest_section.setdefault("ini_options", {})
 
-    # coverage_opts = (
-    #     f"--cov={cc_package_name} --cov-append "
-    #     "--cov-report=term --cov-report=html --cov-report=json"
-    # )
+    coverage_opts = (
+        f"--cov={cc_package_name} --cov-append "
+        "--cov-report=term --cov-report=html --cov-report=json"
+    )
 
     # existing_addopts = ini_options.get("addopts", "")
     # if coverage_opts not in existing_addopts:
@@ -102,7 +102,5 @@ def generate_coverage_flags() -> list[str]:
         "--cov-report=html:coverage-html",
         "--cov-report=json:coverage.json",
     ]
-
-
 
     
