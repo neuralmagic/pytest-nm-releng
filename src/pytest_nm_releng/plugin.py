@@ -96,7 +96,7 @@ def generate_coverage_flags() -> list[str]:
 
         with open(pyproject_path, "w") as f:
             toml.dump(data, f)
-        print(toml.dumps(data))
+        print(f"This is from plugin: {toml.dumps(data)}")
 
     return [
         f"--cov={cc_package_name}",
