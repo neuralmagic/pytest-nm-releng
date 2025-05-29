@@ -15,6 +15,9 @@
 from typing import Callable
 
 import pytest
+import os
+import toml
+from pathlib import Path
 
 from .lib import generate_junit_flags
 
@@ -22,6 +25,7 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
+    new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
 
 
@@ -64,3 +68,39 @@ def add_testsuite_property(
     for property in suite_properties:
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value)
+
+
+def pytest_configure(config):
+    """
+    Pytest hook that runs during pytest startup.
+    It checks for the NMRE_COV_NAME environment variable and injects code coverage flags
+    into the pyproject.toml file of the calling project.
+    """
+    package_name = os.getenv("NMRE_COV_NAME")
+    if not package_name:
+        return  
+
+    addopts_value = f"--cov={package_name} --cov-append --cov-report=term --cov-report=html --cov-report=json"
+
+    pyproject_path = Path.cwd() / "pyproject.toml"
+    if not pyproject_path.exists():
+        print(f"pyproject.toml not found in {Path.cwd()}")
+        return
+
+    with pyproject_path.open("r") as f:
+        data = toml.load(f)
+
+    tool = data.setdefault("tool", {})
+    pytest_config = tool.setdefault("pytest", {})
+    ini_options = pytest_config.setdefault("ini_options", {})
+
+    # Only update if different
+    if ini_options.get("addopts") != addopts_value:
+        ini_options["addopts"] = addopts_value
+        with pyproject_path.open("w") as f:
+            toml.dump(data, f)
+        print(f"Updated code coverage addopts in {pyproject_path}")
+    else:
+        print(f"Coverage addopts already set in {pyproject_path}")
+
+    
