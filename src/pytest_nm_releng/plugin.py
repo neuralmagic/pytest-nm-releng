@@ -71,7 +71,8 @@ def add_testsuite_property(
 
 
 def generate_coverage_flags() -> list[str]:
-    if not (cc_package_name := os.getenv("NMRE_COV_NAME")):
+    cc_package_name = os.getenv("NMRE_COV_NAME")
+    if not cc_package_name:
         return []
 
     pyproject_path = Path("pyproject.toml")
@@ -91,12 +92,20 @@ def generate_coverage_flags() -> list[str]:
     )
 
     existing_addopts = ini_options.get("addopts", "")
+
     if coverage_opts not in existing_addopts:
         ini_options["addopts"] = f"{existing_addopts} {coverage_opts}".strip()
 
         with open(pyproject_path, "w") as f:
             toml.dump(data, f)
-        print(f"This is from plugin: {toml.dumps(data)}")
+
+        # Double-check the written content
+        with open(pyproject_path, "r") as f:
+            result = f.read()
+            print("pyproject.toml updated from plugin:\n", result)
+
+    else:
+        print("ℹ️ Coverage options already present.")
 
     return [
         f"--cov={cc_package_name}",
