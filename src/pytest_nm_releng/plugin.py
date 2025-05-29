@@ -61,24 +61,36 @@ def generate_coverage_flags() -> list[str]:
     print(f"Coverage flags generated from plugin: {' '.join(flags)}")
     return flags
 
+def find_project_root(filename="pyproject.toml") -> Path:
+    current = Path.cwd()
+    for parent in [current] + list(current.parents):
+        candidate = parent / filename
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError(
+        f"{filename} not found in any parent directory of {current}"
+    )
+
 def pytest_configure(config):
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
+        print("NMRE_COV_NAME environment variable not set.")
         return
 
+    # Inject coverage options if not already set
     if not getattr(config.option, "cov_source", []):
         config.option.cov_source = [cc_package_name]
         config.option.cov_append = True
         config.option.cov_report = ["term", "html:coverage-html", "json:coverage.json"]
         print(f"Coverage options injected from plugin for: {cc_package_name}")
 
-    # Optional: print pyproject.toml if it exists
-    pyproject_path = Path("pyproject.toml")
-    print(f"pyproject.toml path: {pyproject_path.resolve()}")
-    if pyproject_path.exists():
+    # Locate and print pyproject.toml
+    try:
+        pyproject_path = find_project_root("pyproject.toml")
+        print(f"pyproject.toml path: {pyproject_path.resolve()}")
         with open(pyproject_path, "r") as f:
             data = toml.load(f)
-            print("Current pyproject.toml contents:")
+            print("📄 Current pyproject.toml contents:")
             print(toml.dumps(data))
-    else:
-        print("pyproject.toml not found.")
+    except FileNotFoundError as e:
+        print(f"{e}")
