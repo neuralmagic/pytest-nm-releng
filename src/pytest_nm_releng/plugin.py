@@ -61,4 +61,13 @@ def generate_coverage_flags() -> list[str]:
     print(f"Coverage flags generated from plugin: {' '.join(flags)}")
     return flags
 
-    
+def pytest_configure(config):
+    cc_package_name = os.getenv("NMRE_COV_NAME")
+    if not cc_package_name:
+        return
+
+    if not getattr(config.option, "cov_source", []):
+        config.option.cov_source = [cc_package_name]
+        config.option.cov_append = True
+        config.option.cov_report = ["term", "html:coverage-html", "json:coverage.json"]
+        print(f"Coverage options injected from plugin for: {cc_package_name}")
