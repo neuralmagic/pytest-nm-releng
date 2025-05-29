@@ -69,38 +69,42 @@ def add_testsuite_property(
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value)
 
+def generate_coverage_flags() -> list[str]:
+    cov_package = os.getenv("NMRE_COV_NAME")
+    if not cov_package:
+        return []
 
-def pytest_configure(config):
-    """
-    Pytest hook that runs during pytest startup.
-    It checks for the NMRE_COV_NAME environment variable and injects code coverage flags
-    into the pyproject.toml file of the calling project.
-    """
-    package_name = os.getenv("NMRE_COV_NAME")
-    if not package_name:
-        return  
-
-    addopts_value = f"--cov={package_name} --cov-append --cov-report=term --cov-report=html --cov-report=json"
-
-    pyproject_path = Path.cwd() / "pyproject.toml"
-    if not pyproject_path.exists():
-        print(f"pyproject.toml not found in {Path.cwd()}")
-        return
-
-    with pyproject_path.open("r") as f:
-        data = toml.load(f)
+    pyproject_path = Path("pyproject.toml")
+    if pyproject_path.exists():
+        with open(pyproject_path, "r") as f:
+            data = toml.load(f)
+    else:
+        data = {}
 
     tool = data.setdefault("tool", {})
-    pytest_config = tool.setdefault("pytest", {})
-    ini_options = pytest_config.setdefault("ini_options", {})
+    pytest_section = tool.setdefault("pytest", {})
+    ini_options = pytest_section.setdefault("ini_options", {})
 
-    # Only update if different
-    if ini_options.get("addopts") != addopts_value:
-        ini_options["addopts"] = addopts_value
-        with pyproject_path.open("w") as f:
+    coverage_opts = (
+        f"--cov={cov_package} --cov-append "
+        "--cov-report=term --cov-report=html --cov-report=json"
+    )
+
+    existing_addopts = ini_options.get("addopts", "")
+    if coverage_opts not in existing_addopts:
+        ini_options["addopts"] = f"{existing_addopts} {coverage_opts}".strip()
+
+        with open(pyproject_path, "w") as f:
             toml.dump(data, f)
-        print(f"Updated code coverage addopts in {pyproject_path}")
-    else:
-        print(f"Coverage addopts already set in {pyproject_path}")
+
+    # Also return CLI flags for immediate test run
+    return [
+        f"--cov={cov_package}",
+        "--cov-append",
+        "--cov-report=term",
+        "--cov-report=html",
+        "--cov-report=json",
+    ]
+
 
     
