@@ -71,3 +71,14 @@ def pytest_configure(config):
         config.option.cov_append = True
         config.option.cov_report = ["term", "html:coverage-html", "json:coverage.json"]
         print(f"Coverage options injected from plugin for: {cc_package_name}")
+
+    # Optional: print pyproject.toml if it exists
+    pyproject_path = Path("pyproject.toml")
+    print(f"pyproject.toml path: {pyproject_path.resolve()}")
+    if pyproject_path.exists():
+        with open(pyproject_path, "r") as f:
+            data = toml.load(f)
+            print("Current pyproject.toml contents:")
+            print(toml.dumps(data))
+    else:
+        print("pyproject.toml not found.")
