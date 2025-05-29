@@ -27,7 +27,7 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args.extend(generate_junit_flags())
     new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
-
+    
 
 # add CLI options to pass properties for test cases/suites
 def pytest_addoption(parser: pytest.Parser, pluginmanager):
@@ -45,73 +45,20 @@ def pytest_addoption(parser: pytest.Parser, pluginmanager):
     )
 
 
-# use pytest hook to add properties to testcase
-def pytest_collection_modifyitems(
-    session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
-):
-    if not (properties := config.getoption("testcase_property")):
-        return
-    for item in items:
-        for property in properties:
-            name, val = property.split("=", maxsplit=1)
-            item.user_properties.append((name, val))
-
-
-# use fixture to add properties to testsuite
-@pytest.fixture(autouse=True, scope="session")
-def add_testsuite_property(
-    request: pytest.FixtureRequest,
-    record_testsuite_property: Callable[[str, object], None],
-):
-    if not (suite_properties := request.config.getoption("testsuite_property")):
-        return
-    for property in suite_properties:
-        name, value = property.split("=", maxsplit=1)
-        record_testsuite_property(name, value)
-
-
 def generate_coverage_flags() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
         return []
 
-    pyproject_path = Path("pyproject.toml")
-    if pyproject_path.exists():
-        with open(pyproject_path, "r") as f:
-            data = toml.load(f)
-    else:
-        data = {}
-
-    tool = data.setdefault("tool", {})
-    pytest_section = tool.setdefault("pytest", {})
-    ini_options = pytest_section.setdefault("ini_options", {})
-
-    coverage_opts = (
-        f"--cov={cc_package_name} --cov-append "
-        "--cov-report=term --cov-report=html --cov-report=json"
-    )
-
-    existing_addopts = ini_options.get("addopts", "")
-
-    if coverage_opts not in existing_addopts:
-        ini_options["addopts"] = f"{existing_addopts} {coverage_opts}".strip()
-
-        with open(pyproject_path, "w") as f:
-            toml.dump(data, f)
-
-        # Double-check the written content
-        with open(pyproject_path, "r") as f:
-            result = f.read()
-            print("pyproject.toml updated from plugin:\n", result)
-
-    else:
-        print("ℹ️ Coverage options already present.")
-
-    return [
+    flags = [
         f"--cov={cc_package_name}",
         "--cov-append",
+        "--cov-report=term",
         "--cov-report=html:coverage-html",
         "--cov-report=json:coverage.json",
     ]
+
+    print(f"Coverage flags generated from plugin: {' '.join(flags)}")
+    return flags
 
     
