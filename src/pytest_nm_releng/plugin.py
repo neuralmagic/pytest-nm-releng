@@ -80,9 +80,9 @@ def generate_coverage_flags() -> list[str]:
     else:
         data = {}
 
-    # tool = data.setdefault("tool", {})
-    # pytest_section = tool.setdefault("pytest", {})
-    # ini_options = pytest_section.setdefault("ini_options", {})
+    tool = data.setdefault("tool", {})
+    pytest_section = tool.setdefault("pytest", {})
+    ini_options = pytest_section.setdefault("ini_options", {})
 
     # coverage_opts = (
     #     f"--cov={cc_package_name} --cov-append "
