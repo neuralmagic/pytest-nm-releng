@@ -69,6 +69,7 @@ def add_testsuite_property(
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value)
 
+
 def generate_coverage_flags() -> list[str]:
     if not (cc_package_name := os.getenv("NMRE_COV_NAME")):
         return []
@@ -89,7 +90,7 @@ def generate_coverage_flags() -> list[str]:
         "--cov-report=term --cov-report=html --cov-report=json"
     )
 
-    # existing_addopts = ini_options.get("addopts", "")
+    existing_addopts = ini_options.get("addopts", "")
     # if coverage_opts not in existing_addopts:
     #     ini_options["addopts"] = f"{existing_addopts} {coverage_opts}".strip()
 
