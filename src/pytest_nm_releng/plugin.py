@@ -69,12 +69,12 @@ def add_testsuite_property(
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value)
 
-# def generate_coverage_flags() -> list[str]:
-#     cov_package = os.getenv("NMRE_COV_NAME")
-#     if not cov_package:
-#         return []
+def generate_coverage_flags() -> list[str]:
+    cov_package = os.getenv("NMRE_COV_NAME")
+    if not cov_package:
+        return []
 
-#     pyproject_path = Path("pyproject.toml")
+    pyproject_path = Path("pyproject.toml")
 #     if pyproject_path.exists():
 #         with open(pyproject_path, "r") as f:
 #             data = toml.load(f)
