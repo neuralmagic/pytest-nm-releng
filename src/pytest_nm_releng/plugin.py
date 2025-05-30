@@ -27,10 +27,9 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args.extend(generate_junit_flags())
     new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
-    print(f"[plugin] Injected CLI args: {' '.join(new_args)}")
     
 
-# Hook to add custom CLI options
+# add CLI options to pass properties for test cases/suites
 def pytest_addoption(parser: pytest.Parser, pluginmanager):
     parser.addoption(
         "--testcase-property",
@@ -44,7 +43,8 @@ def pytest_addoption(parser: pytest.Parser, pluginmanager):
         nargs="*",
         help="property to add to test suite (can pass multiple separated values)",
     )
-    
+
+
 # use pytest hook to add properties to testcase
 def pytest_collection_modifyitems(
     session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
@@ -67,7 +67,7 @@ def add_testsuite_property(
         return
     for property in suite_properties:
         name, value = property.split("=", maxsplit=1)
-        record_testsuite_property(name, value)    
+        record_testsuite_property(name, value) 
 
 # Find project root by walking up to locate pyproject.toml
 def find_project_root(filename="pyproject.toml") -> Path:
