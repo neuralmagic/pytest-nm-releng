@@ -25,7 +25,7 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    #new_args.extend(generate_coverage_flags())
+    new_args.extend(generate_coverage_flags_and_update_pyproject())
     args[:] = [*args, *new_args]
     
 
@@ -44,10 +44,21 @@ def pytest_addoption(parser: pytest.Parser, pluginmanager):
         help="property to add to test suite (can pass multiple separated values)",
     )
 
+def find_project_root(filename="pyproject.toml") -> Path:
+    current = Path.cwd()
+    for parent in [current] + list(current.parents):
+        candidate = parent / filename
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError(
+        f"{filename} not found in any parent directory of {current}"
+    )
 
-def generate_coverage_flags() -> list[str]:
+
+def generate_coverage_flags_and_update_pyproject() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
+        print("Environment variable 'NMRE_COV_NAME' is not set.")
         return []
 
     flags = [
@@ -59,17 +70,38 @@ def generate_coverage_flags() -> list[str]:
     ]
 
     print(f"Coverage flags generated from plugin: {' '.join(flags)}")
+
+    # Find and load pyproject.toml
+    pyproject_path = find_project_root()
+    pyproject_data = toml.load(pyproject_path)
+
+    # Update addopts in [tool.pytest.ini_options]
+    pytest_config = (
+        pyproject_data.setdefault("tool", {})
+        .setdefault("pytest", {})
+        .setdefault("ini_options", {})
+    )
+    current_addopts = pytest_config.get("addopts", "")
+
+    # Convert current addopts to a list if it's a string
+    current_flags = (
+        current_addopts.split() if isinstance(current_addopts, str) else current_addopts
+    )
+    updated_flags = list(
+        dict.fromkeys(current_flags + flags)
+    )  # Remove duplicates, preserve order
+
+    # Update the data structure
+    pytest_config["addopts"] = " ".join(updated_flags)
+
+    # Save the updated pyproject.toml
+    with pyproject_path.open("w", encoding="utf-8") as f:
+        toml.dump(pyproject_data, f)
+        print(f"Updated 'addopts' in {pyproject_path}")
+
     return flags
 
-def find_project_root(filename="pyproject.toml") -> Path:
-    current = Path.cwd()
-    for parent in [current] + list(current.parents):
-        candidate = parent / filename
-        if candidate.exists():
-            return candidate
-    raise FileNotFoundError(
-        f"{filename} not found in any parent directory of {current}"
-    )
+
 
 def pytest_configure(config):
     cc_package_name = os.getenv("NMRE_COV_NAME")
