@@ -25,7 +25,7 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    new_args.extend(generate_coverage_flags())
+    #new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     print(f"[plugin] Injected CLI args: {' '.join(new_args)}")
     #update_pyproject_addopts()
@@ -123,47 +123,29 @@ def generate_coverage_flags() -> list[str]:
     
     return flags
 
-def update_pyproject_addopts():
+def pytest_configure(config):
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
-        print("[nm-releng] NMRE_COV_NAME not set.")
+        print("NMRE_COV_NAME environment variable not set.")
         return
 
-    flags_to_add = [
-        f"--cov={cc_package_name}",
-        "--cov-append",
-        "--cov-report=term",
-        "--cov-report=json",
-        "--cov-report=html:coverage-html",
-    ]
+    # Inject coverage options if not already set
+    if not getattr(config.option, "cov_source", []):
+        config.option.cov_source = [cc_package_name]
+        config.option.cov_append = True
+        config.option.cov_report = ["term", "html:coverage-html", "json:coverage.json"]
+        print(f"Coverage options injected from plugin for: {cc_package_name}")
 
-    pyproject_path = find_project_root()
-    print(f"Working directory when plugin loads: {Path.cwd()}")
-    data = toml.load(pyproject_path)
-
-    ini_options = (
-        data.setdefault("tool", {})
-            .setdefault("pytest", {})
-            .setdefault("ini_options", {})
-    )
-
-    existing_addopts = ini_options.get("addopts", "")
-    current_flags = existing_addopts.split() if isinstance(existing_addopts, str) else []
-
-    # Only add flags that are not already present
-    missing_flags = [flag for flag in flags_to_add if flag not in current_flags]
-
-    if not missing_flags:
-        print("Coverage flags already present in pyproject.toml, skipping update.")
-        return
-
-    updated_flags = current_flags + missing_flags
-    ini_options["addopts"] = " ".join(updated_flags)
-
-    with open(pyproject_path, "w") as f:
-        toml.dump(data, f)
-
-    print(f"Added missing coverage flags to pyproject.toml: {' '.join(missing_flags)}")
+    # Locate and print pyproject.toml
+    try:
+        pyproject_path = find_project_root("pyproject.toml")
+        print(f"pyproject.toml path: {pyproject_path.resolve()}")
+        with open(pyproject_path, "r") as f:
+            data = toml.load(f)
+            print("📄 Current pyproject.toml contents:")
+            print(toml.dumps(data))
+    except FileNotFoundError as e:
+        print(f"{e}")
 
 
 
