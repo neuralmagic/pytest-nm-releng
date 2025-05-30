@@ -25,7 +25,7 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    #new_args.extend(generate_coverage_flags())
+    new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     print(f"[plugin] Injected CLI args: {' '.join(new_args)}")
     update_pyproject_addopts()
