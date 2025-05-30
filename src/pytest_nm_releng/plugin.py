@@ -25,10 +25,10 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    #new_args.extend(generate_coverage_flags())
+    new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     print(f"[plugin] Injected CLI args: {' '.join(new_args)}")
-    #update_pyproject_addopts()
+    
 
 # Hook to add custom CLI options
 def pytest_addoption(parser: pytest.Parser, pluginmanager):
@@ -122,30 +122,5 @@ def generate_coverage_flags() -> list[str]:
     print("--- End of pyproject.toml ---\n")
     
     return flags
-
-def pytest_configure(config):
-    cc_package_name = os.getenv("NMRE_COV_NAME")
-    if not cc_package_name:
-        print("NMRE_COV_NAME environment variable not set.")
-        return
-
-    # Inject coverage options if not already set
-    if not getattr(config.option, "cov_source", []):
-        config.option.cov_source = [cc_package_name]
-        config.option.cov_append = True
-        config.option.cov_report = ["term", "html:coverage-html", "json:coverage.json"]
-        print(f"Coverage options injected from plugin for: {cc_package_name}")
-
-    # Locate and print pyproject.toml
-    try:
-        pyproject_path = find_project_root("pyproject.toml")
-        print(f"pyproject.toml path: {pyproject_path.resolve()}")
-        with open(pyproject_path, "r") as f:
-            data = toml.load(f)
-            print("📄 Current pyproject.toml contents:")
-            print(toml.dumps(data))
-    except FileNotFoundError as e:
-        print(f"{e}")
-
 
 
