@@ -115,7 +115,12 @@ def generate_coverage_flags() -> list[str]:
     # Write back to pyproject.toml
     with pyproject_path.open("w", encoding="utf-8") as f:
         toml.dump(data, f)
-
+        
+    # Print the updated pyproject.toml content
+    print("\n--- Updated pyproject.toml ---")
+    print(toml.dumps(data))
+    print("--- End of pyproject.toml ---\n")
+    
     return flags
 
 def update_pyproject_addopts():
