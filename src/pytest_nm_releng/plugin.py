@@ -65,39 +65,31 @@ def generate_coverage_flags_and_update_pyproject() -> list[str]:
         f"--cov={cc_package_name}",
         "--cov-append",
         "--cov-report=term",
+        "--cov-report=json",
         "--cov-report=html:coverage-html",
-        "--cov-report=json:coverage.json",
     ]
 
     print(f"Coverage flags generated from plugin: {' '.join(flags)}")
 
-    # Find and load pyproject.toml
+    # Load pyproject.toml
     pyproject_path = find_project_root()
-    pyproject_data = toml.load(pyproject_path)
+    data = toml.load(pyproject_path)
 
-    # Update addopts in [tool.pytest.ini_options]
-    pytest_config = (
-        pyproject_data.setdefault("tool", {})
-        .setdefault("pytest", {})
-        .setdefault("ini_options", {})
-    )
-    current_addopts = pytest_config.get("addopts", "")
+    # Navigate or create the necessary structure
+    tool = data.setdefault("tool", {})
+    pytest = tool.setdefault("pytest", {})
+    ini_options = pytest.setdefault("ini_options", {})
 
-    # Convert current addopts to a list if it's a string
-    current_flags = (
-        current_addopts.split() if isinstance(current_addopts, str) else current_addopts
-    )
-    updated_flags = list(
-        dict.fromkeys(current_flags + flags)
-    )  # Remove duplicates, preserve order
+    old_addopts = ini_options.get("addopts", "")
+    old_flags = old_addopts.split() if isinstance(old_addopts, str) else []
 
-    # Update the data structure
-    pytest_config["addopts"] = " ".join(updated_flags)
+    # Avoid duplicates
+    new_flags = list(dict.fromkeys(old_flags + flags))
+    ini_options["addopts"] = " ".join(new_flags)
 
-    # Save the updated pyproject.toml
-    with pyproject_path.open("w", encoding="utf-8") as f:
-        toml.dump(pyproject_data, f)
-        print(f"Updated 'addopts' in {pyproject_path}")
+    # Write back to pyproject.toml
+    with open(pyproject_path, "w") as f:
+        toml.dump(data, f)
 
     return flags
 
