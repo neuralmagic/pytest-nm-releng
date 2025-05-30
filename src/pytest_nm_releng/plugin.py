@@ -80,10 +80,10 @@ def find_project_root(filename="pyproject.toml") -> Path:
         f"{filename} not found in any parent directory of {current}"
     )
 
-# Return CLI flags for coverage (do NOT update pyproject.toml here)
 def generate_coverage_flags() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
+        print("[plugin] NMRE_COV_NAME not set.")
         return []
 
     flags = [
@@ -94,7 +94,7 @@ def generate_coverage_flags() -> list[str]:
         "--cov-report=html:coverage-html",
     ]
 
-    print(f"Coverage flags generated from plugin: {' '.join(flags)}")
+    print(f"[plugin] Coverage flags to ensure: {' '.join(flags)}")
 
     # Load pyproject.toml
     pyproject_path = find_project_root()
@@ -108,19 +108,20 @@ def generate_coverage_flags() -> list[str]:
     old_addopts = ini_options.get("addopts", "")
     old_flags = old_addopts.split() if isinstance(old_addopts, str) else []
 
-    # Avoid duplicates
-    new_flags = list(dict.fromkeys(old_flags + flags))
-    ini_options["addopts"] = " ".join(new_flags)
+    # Only add flags if any are missing
+    if all(flag in old_flags for flag in flags):
+        print("[plugin] All coverage flags already present. Skipping update.")
+    else:
+        updated_flags = list(dict.fromkeys(old_flags + flags))
+        ini_options["addopts"] = " ".join(updated_flags)
 
-    # Write back to pyproject.toml
-    with pyproject_path.open("w", encoding="utf-8") as f:
-        toml.dump(data, f)
-        
-    # Print the updated pyproject.toml content
-    print("\n--- Updated pyproject.toml ---")
-    print(toml.dumps(data))
-    print("--- End of pyproject.toml ---\n")
-    
+        with pyproject_path.open("w", encoding="utf-8") as f:
+            toml.dump(data, f)
+
+        print("[plugin] Added coverage flags to pyproject.toml.")
+
+
     return flags
+
 
 
