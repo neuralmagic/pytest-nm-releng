@@ -25,7 +25,7 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    new_args.extend(generate_coverage_flags_and_update_pyproject())
+    new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     
 
@@ -55,7 +55,7 @@ def find_project_root(filename="pyproject.toml") -> Path:
     )
 
 
-def generate_coverage_flags_and_update_pyproject() -> list[str]:
+def generate_coverage_flags() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
         print("Environment variable 'NMRE_COV_NAME' is not set.")
