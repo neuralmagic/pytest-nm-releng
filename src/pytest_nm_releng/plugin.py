@@ -28,7 +28,7 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     print(f"[plugin] Injected CLI args: {' '.join(new_args)}")
-    update_pyproject_addopts()
+    #update_pyproject_addopts()
 
 # Hook to add custom CLI options
 def pytest_addoption(parser: pytest.Parser, pluginmanager):
@@ -81,10 +81,9 @@ def find_project_root(filename="pyproject.toml") -> Path:
     )
 
 # Return CLI flags for coverage (do NOT update pyproject.toml here)
-def generate_coverage_flags() -> list[str]:
+def generate_coverage_flags_and_update_pyproject() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
-        print("Environment variable 'NMRE_COV_NAME' not set. Skipping coverage flags.")
         return []
 
     flags = [
@@ -94,7 +93,29 @@ def generate_coverage_flags() -> list[str]:
         "--cov-report=json",
         "--cov-report=html:coverage-html",
     ]
-    print(f"[plugin] Generated coverage flags: {' '.join(flags)}")
+
+    print(f"Coverage flags generated from plugin: {' '.join(flags)}")
+
+    # Load pyproject.toml
+    pyproject_path = find_project_root()
+    data = toml.load(pyproject_path)
+
+    # Navigate or create the necessary structure
+    tool = data.setdefault("tool", {})
+    pytest = tool.setdefault("pytest", {})
+    ini_options = pytest.setdefault("ini_options", {})
+
+    old_addopts = ini_options.get("addopts", "")
+    old_flags = old_addopts.split() if isinstance(old_addopts, str) else []
+
+    # Avoid duplicates
+    new_flags = list(dict.fromkeys(old_flags + flags))
+    ini_options["addopts"] = " ".join(new_flags)
+
+    # Write back to pyproject.toml
+    with pyproject_path.open("w", encoding="utf-8") as f:
+        toml.dump(data, f)
+
     return flags
 
 def update_pyproject_addopts():
