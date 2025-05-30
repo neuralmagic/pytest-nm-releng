@@ -81,7 +81,7 @@ def find_project_root(filename="pyproject.toml") -> Path:
     )
 
 # Return CLI flags for coverage (do NOT update pyproject.toml here)
-def generate_coverage_flags_and_update_pyproject() -> list[str]:
+def generate_coverage_flags() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
         return []
