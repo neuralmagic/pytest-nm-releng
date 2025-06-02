@@ -79,8 +79,24 @@ def find_project_root(filename="pyproject.toml") -> Path:
     raise FileNotFoundError(
         f"{filename} not found in any parent directory of {current}"
     )
-
+    
 def generate_coverage_flags() -> list[str]:
+    cc_package_name = os.getenv("NMRE_COV_NAME")
+    if not cc_package_name:
+        print("[pytest-nm-releng] Warning: NMRE_COV_NAME not set, skipping coverage options.")
+        return []
+
+    flags = [
+        f"--cov={cc_package_name}",
+        "--cov-append",
+        "--cov-report=term",
+        "--cov-report=json",
+        "--cov-report=html:coverage-html",
+    ]
+    print(f"[pytest-nm-releng] Injecting coverage flags: {flags}")
+    return flags    
+
+def generate_coverage_flags_old() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
         print("[plugin] NMRE_COV_NAME not set.")
