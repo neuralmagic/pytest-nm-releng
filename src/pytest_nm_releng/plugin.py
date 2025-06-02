@@ -72,14 +72,15 @@ def add_testsuite_property(
 def generate_coverage_flags() -> str:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
-        return ""
+        return []
 
-    return (
-        f"--cov={cc_package_name} "
-        "--cov-append "
-        "--cov-report=html:coverage-html "
-        "--cov-report=json:coverage.json"
-    )   
+    return [
+        f"--cov={cc_package_name}",
+        "--cov-append",
+        "--cov-report=term",
+        "--cov-report=html:coverage-html",
+        "--cov-report=json:coverage.json",
+    ]   
 
 
 
