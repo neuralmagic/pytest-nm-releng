@@ -72,7 +72,7 @@ def add_testsuite_property(
 def generate_coverage_flags() -> List[str]: 
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
-        return [] # This correctly returns an empty list
+        return [] 
 
     flags = [
         f"--cov={cc_package_name}",
