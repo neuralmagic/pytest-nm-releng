@@ -16,7 +16,7 @@ from typing import Callable
 
 import pytest
 import os
-from pathlib import Path
+from typing import List
 
 from .lib import generate_junit_flags
 
@@ -69,18 +69,20 @@ def add_testsuite_property(
         record_testsuite_property(name, value) 
 
 
-def generate_coverage_flags() -> str:
+def generate_coverage_flags() -> List[str]: 
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
-        return []
+        return [] # This correctly returns an empty list
 
-    return [
+    flags = [
         f"--cov={cc_package_name}",
         "--cov-append",
         "--cov-report=term",
         "--cov-report=html:coverage-html",
         "--cov-report=json:coverage.json",
-    ]   
+    ]
+
+    return flags
 
 
 
