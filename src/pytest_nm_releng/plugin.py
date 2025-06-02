@@ -16,7 +16,6 @@ from typing import Callable
 
 import pytest
 import os
-import toml
 from pathlib import Path
 
 from .lib import generate_junit_flags
@@ -95,49 +94,6 @@ def generate_coverage_flags() -> list[str]:
     ]
     print(f"[pytest-nm-releng] Injecting coverage flags: {flags}")
     return flags    
-
-def generate_coverage_flags_old() -> list[str]:
-    cc_package_name = os.getenv("NMRE_COV_NAME")
-    if not cc_package_name:
-        print("[plugin] NMRE_COV_NAME not set.")
-        return []
-
-    flags = [
-        f"--cov={cc_package_name}",
-        "--cov-append",
-        "--cov-report=term",
-        "--cov-report=json",
-        "--cov-report=html:coverage-html",
-    ]
-
-    print(f"[plugin] Coverage flags to ensure: {' '.join(flags)}")
-
-    # Load pyproject.toml
-    pyproject_path = find_project_root()
-    data = toml.load(pyproject_path)
-
-    # Navigate or create the necessary structure
-    tool = data.setdefault("tool", {})
-    pytest = tool.setdefault("pytest", {})
-    ini_options = pytest.setdefault("ini_options", {})
-
-    old_addopts = ini_options.get("addopts", "")
-    old_flags = old_addopts.split() if isinstance(old_addopts, str) else []
-
-    # Only add flags if any are missing
-    if all(flag in old_flags for flag in flags):
-        print("[plugin] All coverage flags already present. Skipping update.")
-    else:
-        updated_flags = list(dict.fromkeys(old_flags + flags))
-        ini_options["addopts"] = " ".join(updated_flags)
-
-        with pyproject_path.open("w", encoding="utf-8") as f:
-            toml.dump(data, f)
-
-        print("[plugin] Added coverage flags to pyproject.toml.")
-
-
-    return flags
 
 
 
