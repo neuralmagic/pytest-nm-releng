@@ -68,17 +68,7 @@ def add_testsuite_property(
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value) 
 
-# Find project root by walking up to locate pyproject.toml
-def find_project_root(filename="pyproject.toml") -> Path:
-    current = Path.cwd()
-    for parent in [current] + list(current.parents):
-        candidate = parent / filename
-        if candidate.exists():
-            return candidate
-    raise FileNotFoundError(
-        f"{filename} not found in any parent directory of {current}"
-    )
-    
+
 def generate_coverage_flags() -> list[str]:
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
