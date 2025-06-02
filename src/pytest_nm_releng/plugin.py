@@ -26,8 +26,8 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args.extend(generate_junit_flags())
     new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
+    early_config.trace(f"DEBUG_PLUGIN: Final pytest args after plugin injection: {args}")
     
-
 # add CLI options to pass properties for test cases/suites
 def pytest_addoption(parser: pytest.Parser, pluginmanager):
     parser.addoption(
@@ -81,7 +81,7 @@ def generate_coverage_flags() -> List[str]:
         "--cov-report=html:coverage-html",
         "--cov-report=json:coverage.json",
     ]
-
+    print(f"DEBUG_PLUGIN: NMRE_COV_NAME in plugin: '{cc_package_name}'")
     return flags
 
 
