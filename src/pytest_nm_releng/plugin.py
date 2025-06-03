@@ -99,10 +99,10 @@ def pytest_sessionstart(session):
         "--cov-report=html:coverage-html"
     )
 
-    root_path = Path(__file__).resolve().parents[2]  
-    env_file_path = root_path / ".coverage_env.sh"
+    project_root = Path.cwd()
+    coverage_env_path = project_root / ".coverage_env.sh"
 
-    with open(env_file_path, "w") as f:
+    with open(coverage_env_path, "w") as f:
         f.write(f'export COVERAGE_FLAGS="{coverage_flags}"\n')
 
-    print(f"Coverage flags written to: {env_file_path}")   
+    print(f"Coverage flags written to: {coverage_env_path}")   
