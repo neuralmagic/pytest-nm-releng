@@ -84,5 +84,35 @@ def generate_coverage_flags() -> List[str]:
     print(f"DEBUG_PLUGIN: NMRE_COV_NAME in plugin: '{cc_package_name}'")
     return flags
 
+def pytest_configure(config):
+    
+    cc_package_name = os.getenv("NMRE_COV_NAME")
+
+    if cc_package_name:
+        print(f"DEBUG_PLUGIN (configure): NMRE_COV_NAME in plugin: '{cc_package_name}'")
+
+        if not hasattr(config.option, 'cov') or config.option.cov is None:
+            config.option.cov = [cc_package_name]
+        elif cc_package_name not in config.option.cov:
+            config.option.cov.append(cc_package_name)
+        
+        config.option.cov_append = True
+
+        if not hasattr(config.option, 'cov_report') or config.option.cov_report is None:
+            config.option.cov_report = []
+        
+        if 'html:coverage-html' not in config.option.cov_report:
+            config.option.cov_report.append('html:coverage-html')
+        if 'json:coverage.json' not in config.option.cov_report:
+            config.option.cov_report.append('json:coverage.json')
+        if 'term' not in config.option.cov_report: 
+            config.option.cov_report.append('term')
+
+        print(f"DEBUG_PLUGIN (configure): Configured cov: {config.option.cov}")
+        print(f"DEBUG_PLUGIN (configure): Configured cov_report: {config.option.cov_report}")
+        print(f"DEBUG_PLUGIN (configure): Configured cov_append: {config.option.cov_append}")
+
+    else:
+        print("DEBUG_PLUGIN (configure): NMRE_COV_NAME not set. Code coverage will not be enabled via plugin.")
 
 
