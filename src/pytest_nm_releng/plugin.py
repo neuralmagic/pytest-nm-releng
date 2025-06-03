@@ -84,38 +84,23 @@ def generate_coverage_flags() -> List[str]:
     print(f"DEBUG_PLUGIN: NMRE_COV_NAME in plugin: '{cc_package_name}'")
     return flags
 
-def pytest_configure(config):
+
+def pytest_cmdline_preparse(config, args: list[str]):
     cc_package_name = os.getenv("NMRE_COV_NAME")
+    if not cc_package_name:
+        return
 
-    if cc_package_name:
-        print(f"DEBUG_PLUGIN (configure): NMRE_COV_NAME in plugin: '{cc_package_name}'")
+    coverage_flags = [
+        f"--cov={cc_package_name}",
+        "--cov-append",
+        "--cov-report=term",
+        "--cov-report=html:coverage-html",
+        "--cov-report=json:coverage.json"
+    ]
 
-        if not hasattr(config.option, 'cov') or config.option.cov is None:
-            config.option.cov = [cc_package_name]
-        elif isinstance(config.option.cov, list) and cc_package_name not in config.option.cov:
-            config.option.cov.append(cc_package_name)
-        elif not isinstance(config.option.cov, list):
-            print(f"WARNING: config.option.cov found as unexpected type {type(config.option.cov)}. Overwriting.")
-            config.option.cov = [cc_package_name]
-
-        config.option.cov_append = True
-
-        if not hasattr(config.option, 'cov_report') or config.option.cov_report is None:
-            config.option.cov_report = {} 
-        elif not isinstance(config.option.cov_report, dict):
-            print(f"WARNING: config.option.cov_report found as unexpected type {type(config.option.cov_report)}. Overwriting as dict.")
-            config.option.cov_report = {} 
-
-        config.option.cov_report.update({
-            'html': 'coverage-html',
-            'json': 'coverage.json',
-            'term': None 
-        })
-
-        print(f"DEBUG_PLUGIN (configure): Final configured cov: {config.option.cov}")
-        print(f"DEBUG_PLUGIN (configure): Final configured cov_report: {config.option.cov_report}")
-        print(f"DEBUG_PLUGIN (configure): Final configured cov_append: {config.option.cov_append}")
-
+    # Only append if not already present
+    if not any(flag.startswith("--cov") for flag in args):
+        print(f"DEBUG_PLUGIN (preparse): injecting coverage flags for {cc_package_name}")
+        args.extend(coverage_flags)
     else:
-        print("DEBUG_PLUGIN (configure): NMRE_COV_NAME not set. Code coverage will not be enabled via plugin.")
-
+        print("DEBUG_PLUGIN (preparse): coverage flags already present, skipping injection.")
