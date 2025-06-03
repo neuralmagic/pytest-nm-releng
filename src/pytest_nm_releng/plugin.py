@@ -17,6 +17,7 @@ from typing import Callable
 import pytest
 import os
 from typing import List
+from pathlib import Path
 
 from .lib import generate_junit_flags
 
@@ -85,22 +86,23 @@ def generate_coverage_flags() -> List[str]:
     return flags
 
 
-def pytest_cmdline_preparse(config, args: list[str]):
+def pytest_sessionstart(session):
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
         return
 
-    coverage_flags = [
-        f"--cov={cc_package_name}",
-        "--cov-append",
-        "--cov-report=term",
-        "--cov-report=html:coverage-html",
-        "--cov-report=json:coverage.json"
-    ]
+    coverage_flags = (
+        f"--cov={cc_package_name} "
+        "--cov-append "
+        "--cov-report=term "
+        "--cov-report=json "
+        "--cov-report=html:coverage-html"
+    )
 
-    # Only append if not already present
-    if not any(flag.startswith("--cov") for flag in args):
-        print(f"DEBUG_PLUGIN (preparse): injecting coverage flags for {cc_package_name}")
-        args.extend(coverage_flags)
-    else:
-        print("DEBUG_PLUGIN (preparse): coverage flags already present, skipping injection.")
+    root_path = Path(__file__).resolve().parents[2]  
+    env_file_path = root_path / ".coverage_env.sh"
+
+    with open(env_file_path, "w") as f:
+        f.write(f'export COVERAGE_FLAGS="{coverage_flags}"\n')
+
+    print(f"Coverage flags written to: {env_file_path}")   
