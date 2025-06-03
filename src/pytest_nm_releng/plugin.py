@@ -85,7 +85,6 @@ def generate_coverage_flags() -> List[str]:
     return flags
 
 def pytest_configure(config):
-    
     cc_package_name = os.getenv("NMRE_COV_NAME")
 
     if cc_package_name:
@@ -93,26 +92,30 @@ def pytest_configure(config):
 
         if not hasattr(config.option, 'cov') or config.option.cov is None:
             config.option.cov = [cc_package_name]
-        elif cc_package_name not in config.option.cov:
+        elif isinstance(config.option.cov, list) and cc_package_name not in config.option.cov:
             config.option.cov.append(cc_package_name)
-        
+        elif not isinstance(config.option.cov, list):
+            print(f"WARNING: config.option.cov found as unexpected type {type(config.option.cov)}. Overwriting.")
+            config.option.cov = [cc_package_name]
+
         config.option.cov_append = True
 
         if not hasattr(config.option, 'cov_report') or config.option.cov_report is None:
-            config.option.cov_report = []
-        
-        if 'html:coverage-html' not in config.option.cov_report:
-            config.option.cov_report.append('html:coverage-html')
-        if 'json:coverage.json' not in config.option.cov_report:
-            config.option.cov_report.append('json:coverage.json')
-        if 'term' not in config.option.cov_report: 
-            config.option.cov_report.append('term')
+            config.option.cov_report = {} 
+        elif not isinstance(config.option.cov_report, dict):
+            print(f"WARNING: config.option.cov_report found as unexpected type {type(config.option.cov_report)}. Overwriting as dict.")
+            config.option.cov_report = {} 
 
-        print(f"DEBUG_PLUGIN (configure): Configured cov: {config.option.cov}")
-        print(f"DEBUG_PLUGIN (configure): Configured cov_report: {config.option.cov_report}")
-        print(f"DEBUG_PLUGIN (configure): Configured cov_append: {config.option.cov_append}")
+        config.option.cov_report.update({
+            'html': 'coverage-html',
+            'json': 'coverage.json',
+            'term': None 
+        })
+
+        print(f"DEBUG_PLUGIN (configure): Final configured cov: {config.option.cov}")
+        print(f"DEBUG_PLUGIN (configure): Final configured cov_report: {config.option.cov_report}")
+        print(f"DEBUG_PLUGIN (configure): Final configured cov_append: {config.option.cov_append}")
 
     else:
         print("DEBUG_PLUGIN (configure): NMRE_COV_NAME not set. Code coverage will not be enabled via plugin.")
-
 
