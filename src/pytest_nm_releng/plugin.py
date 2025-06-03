@@ -24,7 +24,7 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    new_args.extend(generate_coverage_flags())
+    #new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     early_config.trace(f"DEBUG_PLUGIN: Final pytest args after plugin injection: {args}")
     
