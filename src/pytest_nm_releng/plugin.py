@@ -42,21 +42,12 @@ def pytest_addoption(parser: pytest.Parser, pluginmanager):
         nargs="*",
         help="property to add to test suite (can pass multiple separated values)",
     )
-    parser.addoption(
-        "--init-only",
-        action="store_true",
-        help="Initialize pytest and trigger sessionstart hook without running tests",
-    )
-
+    
 
 # use pytest hook to add properties to testcase
 def pytest_collection_modifyitems(
     session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
 ):
-    if config.getoption("--init-only"):
-        print("--init-only flag detected: Skipping all collected tests")
-        items.clear()
-        return
     if not (properties := config.getoption("testcase_property")):
         return
     for item in items:
@@ -76,25 +67,3 @@ def add_testsuite_property(
     for property in suite_properties:
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value) 
-
-# Add coverage flags to the tests
-def pytest_sessionstart(session):
-    cc_package_name = os.getenv("NMRE_COV_NAME")
-    if not cc_package_name:
-        return
-
-    coverage_flags = (
-        f"--cov={cc_package_name} "
-        "--cov-append "
-        "--cov-report=term "
-        "--cov-report=json "
-        "--cov-report=html:coverage-html"
-    )
-
-    project_root = Path.cwd()
-    coverage_env_path = project_root / ".coverage_env.sh"
-
-    with open(coverage_env_path, "w") as f:
-        f.write(f'export PYTEST_ADDOPTS="{coverage_flags}"\n')
-
-    print(f"Coverage flags written to: {coverage_env_path}")   
