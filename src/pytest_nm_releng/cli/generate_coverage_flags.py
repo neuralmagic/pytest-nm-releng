@@ -10,10 +10,7 @@ def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh")
         "--cov-report=html:coverage-html"
     )
 
-    project_root = Path.cwd()
-    output_path = project_root / output_file
-
-    with open(output_path, "w") as f:
+    with open(output_file, "w") as f:
         f.write(f'export PYTEST_ADDOPTS="{coverage_flags}"\n')
 
     print(f"Coverage flags written to: {output_path}")
