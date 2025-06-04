@@ -112,6 +112,6 @@ def pytest_sessionstart(session):
     coverage_env_path = project_root / ".coverage_env.sh"
 
     with open(coverage_env_path, "w") as f:
-        f.write(f'export COVERAGE_FLAGS="{coverage_flags}"\n')
+        f.write(f'export PYTEST_ADDOPTS="{coverage_flags}"\n')
 
     print(f"Coverage flags written to: {coverage_env_path}")   
