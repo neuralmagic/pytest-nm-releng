@@ -43,12 +43,21 @@ def pytest_addoption(parser: pytest.Parser, pluginmanager):
         nargs="*",
         help="property to add to test suite (can pass multiple separated values)",
     )
+    parser.addoption(
+        "--init-only",
+        action="store_true",
+        help="Initialize pytest and trigger sessionstart hook without running tests",
+    )
 
 
 # use pytest hook to add properties to testcase
 def pytest_collection_modifyitems(
     session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
 ):
+    if config.getoption("--init-only"):
+        print("--init-only flag detected: Skipping all collected tests")
+        items.clear()
+        return
     if not (properties := config.getoption("testcase_property")):
         return
     for item in items:
