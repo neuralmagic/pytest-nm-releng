@@ -10,7 +10,6 @@ def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh")
         "--cov-report=html:coverage-html"
     )
 
-    # Ensure the file is created at the root of the project (i.e. where CLI is invoked)
     project_root = Path.cwd()
     output_path = project_root / output_file
 
@@ -28,7 +27,7 @@ def main():
     )
     parser.add_argument(
         "--output-file",
-        default=".coverage_env.sh",
+        default=".coverage_flags.s",
         help="Output file to write the export command"
     )
     args = parser.parse_args()
