@@ -27,7 +27,7 @@ def main():
     )
     parser.add_argument(
         "--output-file",
-        default=".coverage_flags.s",
+        default=".coverage_flags.sh",
         help="Output file to write the export command"
     )
     args = parser.parse_args()
