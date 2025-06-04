@@ -25,7 +25,6 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
-    #new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
     early_config.trace(f"DEBUG_PLUGIN: Final pytest args after plugin injection: {args}")
     
@@ -78,23 +77,7 @@ def add_testsuite_property(
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value) 
 
-
-def generate_coverage_flags() -> List[str]: 
-    cc_package_name = os.getenv("NMRE_COV_NAME")
-    if not cc_package_name:
-        return [] 
-
-    flags = [
-        f"--cov={cc_package_name}",
-        "--cov-append",
-        "--cov-report=term",
-        "--cov-report=html:coverage-html",
-        "--cov-report=json:coverage.json",
-    ]
-    print(f"DEBUG_PLUGIN: NMRE_COV_NAME in plugin: '{cc_package_name}'")
-    return flags
-
-
+# Add coverage flags to the tests
 def pytest_sessionstart(session):
     cc_package_name = os.getenv("NMRE_COV_NAME")
     if not cc_package_name:
