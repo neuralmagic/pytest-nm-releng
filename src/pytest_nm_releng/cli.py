@@ -1,26 +1,36 @@
-import os
+import argparse
 from pathlib import Path
 
-def generate_coverage_env(cc_package_name: str = None):
-    if not cc_package_name:
-        cc_package_name = os.getenv("NMRE_COV_NAME")
-    
-    if not cc_package_name:
-        print("NMRE_COV_NAME not set. Cannot write coverage flags.")
-        return
-
+def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh"):
     coverage_flags = (
-        f"--cov={cc_package_name} "
+        f"--cov={package} "
         "--cov-append "
         "--cov-report=term "
         "--cov-report=json "
         "--cov-report=html:coverage-html"
     )
 
+    # Ensure the file is created at the root of the project (i.e. where CLI is invoked)
     project_root = Path.cwd()
-    coverage_env_path = project_root / ".coverage_env.sh"
+    output_path = project_root / output_file
 
-    with open(coverage_env_path, "w") as f:
+    with open(output_path, "w") as f:
         f.write(f'export PYTEST_ADDOPTS="{coverage_flags}"\n')
 
-    print(f"Coverage flags written to: {coverage_env_path}")
+    print(f"Coverage flags written to: {output_path}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate pytest coverage flags.")
+    parser.add_argument(
+        "--package",
+        required=True,
+        help="Name of the package to cover"
+    )
+    parser.add_argument(
+        "--output-file",
+        default=".coverage_env.sh",
+        help="Output file to write the export command"
+    )
+    args = parser.parse_args()
+
+    generate_coverage_flags(args.package, args.output_file)
