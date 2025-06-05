@@ -27,7 +27,7 @@ from pytest_nm_releng.cli import generate_coverage_flags
     [
         ("vllm", "--cov=vllm"),
         ("my_lib", "--cov=my_lib"),
-    ]
+    ],
 )
 def test_generate_coverage_flags_to_file(package_name, expected_flag):
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -35,8 +35,10 @@ def test_generate_coverage_flags_to_file(package_name, expected_flag):
 
         test_args = [
             "generate_coverage_flags",
-            "--package", package_name,
-            "--output-file", str(output_path),
+            "--package",
+            package_name,
+            "--output-file",
+            str(output_path),
         ]
 
         with patch.object(sys, "argv", test_args):

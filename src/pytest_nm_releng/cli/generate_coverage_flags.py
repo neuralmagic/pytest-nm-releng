@@ -29,17 +29,14 @@ def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh")
 
     print(f"Coverage flags written to: {output_file}")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Generate pytest coverage flags.")
-    parser.add_argument(
-        "--package",
-        required=True,
-        help="Name of the package to cover"
-    )
+    parser.add_argument("--package", required=True, help="Name of the package to cover")
     parser.add_argument(
         "--output-file",
         default=".coverage_flags.sh",
-        help="Output file to write the export command"
+        help="Output file to write the export command",
     )
     args = parser.parse_args()
 
