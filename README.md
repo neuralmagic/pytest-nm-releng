@@ -127,7 +127,6 @@ pytest [...]
 # runs pytest with coverage enabled for the `vllm` package, preserving any existing PYTEST_ADDOPTS
 ```
 
-
 ## Contributing
 
 To contribute, follow these general steps:
@@ -145,6 +144,8 @@ To contribute, follow these general steps:
    pipx install tox
    # example: using uv
    uv tool install tox --with tox-uv
+   ```
+
 ````
 
 1. Run quality checks and tests
@@ -167,3 +168,4 @@ This pytest plugin was generated with [Cookiecutter] along with [@hackebrot]'s [
 [@hackebrot]: https://github.com/hackebrot
 [cookiecutter]: https://github.com/audreyr/cookiecutter
 [cookiecutter-pytest-plugin]: https://github.com/pytest-dev/cookiecutter-pytest-plugin
+````
