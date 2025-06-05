@@ -25,7 +25,7 @@ def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh")
     )
 
     with open(output_file, "w") as f:
-        f.write(f'export PYTEST_ADDOPTS="{coverage_flags}"\n')
+        f.write(f'export PYTEST_ADDOPTS="${{PYTEST_ADDOPTS:-}} {coverage_flags}"\n')
 
     print(f"Coverage flags written to: {output_file}")
 
