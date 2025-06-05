@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import argparse
-from pathlib import Path
 
 def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh"):
     coverage_flags = (

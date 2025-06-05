@@ -15,9 +15,6 @@
 from typing import Callable
 
 import pytest
-import os
-from typing import List
-from pathlib import Path
 
 from .lib import generate_junit_flags
 
@@ -26,8 +23,8 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
     args[:] = [*args, *new_args]
-    early_config.trace(f"DEBUG_PLUGIN: Final pytest args after plugin injection: {args}")
-    
+
+
 # add CLI options to pass properties for test cases/suites
 def pytest_addoption(parser: pytest.Parser, pluginmanager):
     parser.addoption(
@@ -42,7 +39,7 @@ def pytest_addoption(parser: pytest.Parser, pluginmanager):
         nargs="*",
         help="property to add to test suite (can pass multiple separated values)",
     )
-    
+
 
 # use pytest hook to add properties to testcase
 def pytest_collection_modifyitems(
@@ -66,4 +63,4 @@ def add_testsuite_property(
         return
     for property in suite_properties:
         name, value = property.split("=", maxsplit=1)
-        record_testsuite_property(name, value) 
+        record_testsuite_property(name, value)

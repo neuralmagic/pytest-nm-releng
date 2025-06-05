@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import sys
-from pathlib import Path
 import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-from unittest.mock import patch
 
 from pytest_nm_releng.cli import generate_coverage_flags
 
