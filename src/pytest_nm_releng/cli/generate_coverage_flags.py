@@ -14,6 +14,7 @@
 
 import argparse
 
+
 def generate_coverage_flags(package: str, output_file: str = ".coverage_env.sh"):
     coverage_flags = (
         f"--cov={package} "
