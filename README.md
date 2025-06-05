@@ -111,12 +111,13 @@ This is included via the `nmre-generate-coverage-flags` script when installed.
 
 Generates a shell export command for `PYTEST_ADDOPTS` with the following coverage flags:
 
-````bash
+```bash
 --cov=<your_package> --cov-append --cov-report=term --cov-report=json --cov-report=html:coverage-html
-
+```
 
 #### Example: Adding coverage flags to pytest_addopts
 
+```bash
 nmre-generate-coverage-flags --package vllm --output-file .my_cov_env.sh
 # creates a file named `.coverage_flags.sh` in the current directory
 # containing an export statement for PYTEST_ADDOPTS with coverage options
@@ -124,6 +125,7 @@ nmre-generate-coverage-flags --package vllm --output-file .my_cov_env.sh
 source .coverage_flags.sh
 pytest [...]
 # runs pytest with coverage enabled for the `vllm` package, preserving any existing PYTEST_ADDOPTS
+```
 
 
 ## Contributing
