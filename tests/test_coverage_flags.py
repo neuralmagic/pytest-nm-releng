@@ -15,9 +15,12 @@
 import sys
 from pathlib import Path
 import tempfile
+
 import pytest
 from unittest.mock import patch
+
 from pytest_nm_releng.cli import generate_coverage_flags
+
 
 @pytest.mark.parametrize(
     "package_name, expected_flag",
