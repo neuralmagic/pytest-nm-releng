@@ -101,6 +101,32 @@ pytest [...] --testcase-property gpu_name=h100 gpu_count=2
 # name=gpu_name/value=h100 and one with name=gpu_count/value=2
 ```
 
+### Generate Coverage Flags for `PYTEST_ADDOPTS`
+
+The CLI tool `generate_coverage_flags` helps generate standardized coverage flags and writes them to a shell script that can be sourced into the environment.
+
+This is included via the `nmre-generate-coverage-flags` script when installed.
+
+#### What It Does
+
+Generates a shell export command for `PYTEST_ADDOPTS` with the following coverage flags:
+
+```bash
+--cov=<your_package> --cov-append --cov-report=term --cov-report=json --cov-report=html:coverage-html
+```
+
+#### Example: Adding coverage flags to pytest_addopts
+
+```bash
+nmre-generate-coverage-flags --package vllm --output-file .my_cov_env.sh
+# creates a file named `.coverage_flags.sh` in the current directory
+# containing an export statement for PYTEST_ADDOPTS with coverage options
+
+source .coverage_flags.sh
+pytest [...]
+# runs pytest with coverage enabled for the `vllm` package, preserving any existing PYTEST_ADDOPTS
+```
+
 ## Contributing
 
 To contribute, follow these general steps:
