@@ -15,6 +15,8 @@
 from typing import Callable
 
 import pytest
+import os
+import sys
 
 from .lib import generate_junit_flags
 
@@ -23,6 +25,14 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
     args[:] = [*args, *new_args]
+    cov_name = os.getenv("NMRE_COV_NAME")
+    if cov_name and not any(arg.startswith("--cov") for arg in sys.argv):
+        sys.argv.extend([
+            f"--cov={cov_name}",
+            "--cov-report=html",
+            "--cov-report=json",
+            "--cov-report=term"
+        ])
 
 
 # add CLI options to pass properties for test cases/suites
