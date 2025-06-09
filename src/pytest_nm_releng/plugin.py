@@ -24,16 +24,9 @@ from .lib import generate_junit_flags
 def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args: list[str] = []
     new_args.extend(generate_junit_flags())
+    new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
-    cov_name = os.getenv("NMRE_COV_NAME")
-    if cov_name and not any(arg.startswith("--cov") for arg in sys.argv):
-        sys.argv.extend([
-            f"--cov={cov_name}",
-            "--cov-append ",
-            "--cov-report=html",
-            "--cov-report=json",
-            "--cov-report=term"
-        ])
+    
 
 
 # add CLI options to pass properties for test cases/suites
@@ -75,3 +68,16 @@ def add_testsuite_property(
     for property in suite_properties:
         name, value = property.split("=", maxsplit=1)
         record_testsuite_property(name, value)
+
+def generate_coverage_flags():
+    cov_module = os.getenv("NMRE_COV_NAME")
+    if not cov_module:
+        return []
+
+    return [
+        f"--cov={cov_module} "
+        "--cov-append "
+        "--cov-report=term "
+        "--cov-report=json "
+        "--cov-report=html:coverage-html"
+    ]
