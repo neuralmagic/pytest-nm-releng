@@ -29,6 +29,7 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     if cov_name and not any(arg.startswith("--cov") for arg in sys.argv):
         sys.argv.extend([
             f"--cov={cov_name}",
+            "--cov-append ",
             "--cov-report=html",
             "--cov-report=json",
             "--cov-report=term"
