@@ -79,6 +79,6 @@ def generate_coverage_flags():
         f"--cov={cov_module}",
         "--cov-append",
         "--cov-report=term",
-        "--cov-report=json",
+        "--cov-report=json:coverage.json",
         "--cov-report=html:coverage-html"
     ]
