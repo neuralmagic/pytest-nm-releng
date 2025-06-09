@@ -26,6 +26,7 @@ def pytest_load_initial_conftests(early_config, args: list[str], parser):
     new_args.extend(generate_junit_flags())
     new_args.extend(generate_coverage_flags())
     args[:] = [*args, *new_args]
+    print("[DEBUG] Final pytest args:", args) 
     
 
 
